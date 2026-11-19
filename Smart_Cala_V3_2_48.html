@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#073B4C">
+<meta name="description" content="Favignana Weather: meteo, condizioni del mare, consigli su dove andare oggi e informazioni per raggiungere Favignana.">
+<link id="leaflet-css" rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css'">
+<title>Smart Cala — Favignana Weather V3.2.44</title>
+<style>
+:root{--sea:#087e8b;--sea2:#19a6b5;--sand:#f4eddf;--ink:#17343b;--muted:#607b81;--good:#187a5b;--line:#dbe9e8}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;background:linear-gradient(180deg,#e8f7f8 0,#f8fbf9 48%,#f7f1e5 100%);color:var(--ink)}
+header{padding:20px 6%;display:flex;justify-content:space-between;align-items:center;background:#ffffffdc;position:sticky;top:0;z-index:5;backdrop-filter:blur(10px);border-bottom:1px solid #e2eeee}
+.logo{font-weight:900;letter-spacing:.5px}.logo span{color:var(--sea)}nav a{margin-left:22px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:650}
+.hero{padding:58px 6% 28px;max-width:1200px;margin:auto}.eyebrow{color:var(--sea);font-weight:850;text-transform:uppercase;font-size:12px;letter-spacing:2px}
+h1{font-size:clamp(42px,7vw,76px);line-height:.96;letter-spacing:-2px;margin:14px 0}.hero p{font-size:18px;color:var(--muted);max-width:680px;line-height:1.6}
+.wrap{max-width:1200px;margin:20px auto;padding:0 6%}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}
+.card{background:#fff;border:1px solid #e8f0ee;border-radius:24px;padding:24px;box-shadow:0 12px 35px #174e5b0c}
+.weather{display:flex;align-items:center;justify-content:space-between;gap:20px}.temp{font-size:60px;font-weight:850;letter-spacing:-2px}.condition,.sub,small{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:22px}.stat{background:#f2f8f7;border-radius:15px;padding:13px}.stat small{font-size:12px}.stat b{display:block;margin-top:5px;font-size:14px}
+.pill{display:inline-block;border-radius:99px;background:#e2f5ed;color:var(--good);padding:7px 11px;font-size:12px;font-weight:850}.demo{background:#fff4dc;color:#805514}
+.compassbox{display:flex;align-items:center;justify-content:center;gap:18px;min-height:185px}.compass{width:142px;height:142px;border:2px solid #b9d8db;border-radius:50%;position:relative;background:radial-gradient(circle,#f7fcfc 0,#fff 70%)}.compass:before{content:"N";position:absolute;top:7px;left:calc(50% - 5px);font-weight:900;color:var(--sea)}.compass:after{content:"S";position:absolute;bottom:7px;left:calc(50% - 5px);font-weight:800;color:#9ab5b9}.arrow{position:absolute;width:4px;height:54px;background:var(--sea);left:67px;top:25px;transform-origin:bottom;border-radius:5px;transform:rotate(45deg)}.arrow:after{content:"";position:absolute;top:-7px;left:-5px;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:14px solid var(--sea)}
+.section-title{font-size:31px;letter-spacing:-.7px;margin:0 0 8px}.section-lead{color:var(--muted);margin:0 0 22px;line-height:1.55}
+.selector{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 22px}.selector button{border:1px solid #cfe2e3;background:white;color:var(--ink);padding:10px 14px;border-radius:99px;font-weight:800;cursor:pointer}.selector button.active{background:var(--sea);border-color:var(--sea);color:white}
+.recommendations{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.beach{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px}.beach .num{font-size:12px;font-weight:900;color:var(--sea);letter-spacing:1px}.beach h3{margin:8px 0 7px;font-size:18px}.beach p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+.note{border-left:4px solid var(--sea2);background:#edf8f7;padding:15px 17px;border-radius:0 13px 13px 0;color:#31555b;line-height:1.55;font-size:14px;margin-top:18px}
+.matrix{overflow:auto;border-radius:18px;border:1px solid var(--line);background:#fff}table{border-collapse:collapse;width:100%;min-width:780px}th,td{text-align:left;padding:14px 16px;border-bottom:1px solid #edf2f1;font-size:13px;vertical-align:top}th{background:#eff8f7;color:#31565c}td:first-child{font-weight:900;white-space:nowrap}tr:last-child td{border-bottom:0}
+.cta{background:var(--ink);color:#fff;border-radius:25px;padding:30px;display:flex;align-items:center;justify-content:space-between;gap:20px;margin:32px 0 55px}.cta p{color:#c7d9dc;line-height:1.55;max-width:680px}.cta a{background:white;color:var(--ink);padding:13px 18px;border-radius:99px;text-decoration:none;font-weight:850;white-space:nowrap}
+footer{text-align:center;padding:30px 6%;color:var(--muted);font-size:12px;line-height:1.7}
+@media(max-width:800px){nav{display:none}.grid,.recommendations{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.weather{align-items:flex-start;flex-direction:column}.cta{display:block}.cta a{display:inline-block}.hero{padding-top:42px}}
+
+.lang-switch{display:flex;gap:6px;align-items:center}.lang-switch button{border:1px solid #cfe2e3;background:#fff;color:var(--ink);border-radius:10px;padding:7px 9px;font-size:17px;line-height:1;min-width:38px;min-height:36px;font-weight:850;cursor:pointer;filter:grayscale(.35);transition:background .18s,border-color .18s,filter .18s}.lang-switch button.active{background:var(--sea);color:#fff;border-color:var(--sea);filter:none;box-shadow:0 0 0 2px #087e8b24}
+.map-card{padding:12px;overflow:hidden}.map-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 10px 14px}.map-top p{margin:4px 0 0;color:var(--muted);font-size:13px}.map-tag{font-size:11px;font-weight:800;background:#e7f5f4;padding:7px 10px;border-radius:99px;color:var(--sea);white-space:nowrap}#map{height:560px;width:100%;border-radius:17px;z-index:1;background:#dce9e8;outline:1px solid #d4e3e1}.map-legend{display:flex;flex-wrap:wrap;gap:12px;padding:12px 8px 4px;font-size:12px;color:var(--muted)}.map-legend span{display:flex;align-items:center;gap:6px}.dot{width:9px;height:9px;border-radius:50%;background:var(--sea);display:inline-block}.leaflet-popup-content-wrapper{border-radius:14px}.leaflet-popup-content{font-family:inherit;line-height:1.5}.leaflet-popup-content b{font-size:15px}.leaflet-popup-content button{border:0;background:var(--sea);color:#fff;padding:8px 11px;border-radius:9px;font-weight:800;margin-top:6px;cursor:pointer}.directions-link{display:inline-flex;align-items:center;gap:7px;margin-top:10px;padding:10px 13px;border-radius:10px;background:#087e8b;color:#fff!important;text-decoration:none!important;font-weight:850;font-size:13px;box-shadow:0 4px 12px #087e8b22}.directions-link:hover{background:#066773}.leaflet-popup-content .directions-link{margin-top:8px}.beach-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.beach-actions .maplink{margin-top:0!important;min-height:44px}.beach-actions .go-cove{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:10px 13px;border-radius:10px;background:#087e8b;color:#fff;text-decoration:none;font-weight:850;font-size:13px;box-shadow:0 4px 12px #087e8b22}.beach-actions .go-cove:hover{background:#066773}
+@media(max-width:800px){#map{height:460px}.lang-switch{gap:4px}.lang-switch button{padding:6px 7px;min-width:34px;min-height:34px}header{padding:14px 5%}.logo{font-size:14px}}
+
+
+/* V3.2.24 · bussola meteorologica dettagliata */
+.wind-detail-card{min-width:0}.wind-detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.wind-bearing{font-size:34px;line-height:1;margin:8px 0 5px;letter-spacing:-1px}.wind-detail-head .pill{white-space:nowrap}.compassbox{justify-content:space-around;gap:14px;min-height:190px;padding:8px 0}.compass.compass-real{width:158px;height:158px;flex:0 0 158px;border:1px solid #a9c8ce;background:repeating-conic-gradient(from -2deg,#d9e7e9 0deg 1deg,transparent 1deg 15deg),radial-gradient(circle,#fff 0,#f4fbfb 69%,#e3f1f2 70%,#fff 72%);box-shadow:inset 0 0 0 7px #ffffff,0 5px 15px #174e5b12}.compass-real:before,.compass-real:after{display:none}.cardinal,.intercardinal{position:absolute;font-size:10px;font-weight:900;z-index:2;transform:translate(-50%,-50%)}.cardinal-n{left:50%;top:11px;color:#c44c40}.cardinal-e{left:calc(100% - 12px);top:50%}.cardinal-s{left:50%;top:calc(100% - 11px)}.cardinal-w{left:12px;top:50%}.intercardinal{font-size:8px;color:#6a858b}.inter-ne{left:75%;top:25%}.inter-se{left:75%;top:75%}.inter-sw{left:25%;top:75%}.inter-nw{left:25%;top:25%}.compass-needle{position:absolute;left:calc(50% - 2px);top:19px;width:4px;height:59px;background:linear-gradient(to bottom,#d64d42 0 50%,#456c78 50% 100%);border-radius:4px;transform-origin:bottom center;transform:rotate(0deg);z-index:3;filter:drop-shadow(0 1px 1px #0002);transition:transform .5s ease}.compass-needle:before{content:"";position:absolute;top:-9px;left:-6px;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid #d64d42}.compass-center{position:absolute;left:calc(50% - 5px);top:calc(50% - 5px);width:10px;height:10px;border-radius:50%;background:#17343b;border:2px solid white;z-index:4}.wind-readout{min-width:100px}.wind-readout strong{display:block;font-size:19px;line-height:1.25;margin-top:3px}.wind-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px}.wind-metrics>div{background:#f2f8f7;padding:10px 12px;border-radius:12px;min-width:0}.wind-metrics small{display:block;font-size:11px}.wind-metrics b{display:block;font-size:14px;margin-top:4px;overflow-wrap:anywhere}.wind-forecast{margin-top:16px;border-top:1px solid #e7efee;padding-top:13px}.wind-forecast-title{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;margin-bottom:10px}.wind-hourly{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}.wind-hour{background:#f4f9f8;border-radius:10px;padding:8px 3px;text-align:center;min-width:0}.wind-hour time{display:block;font-size:10px;color:var(--muted)}.wind-hour .hour-arrow{font-size:18px;display:block;line-height:1.5;color:var(--sea);transform-origin:center}.wind-hour b{display:block;font-size:11px}.wind-hour small{display:block;font-size:9px;margin-top:3px}.forecast-empty{grid-column:1/-1;color:var(--muted);font-size:12px;padding:10px 0}.wind-source-note{font-size:11px;line-height:1.45;margin:12px 0 0}
+@media(max-width:800px){.compassbox{min-height:160px;gap:12px}.compass.compass-real{width:136px;height:136px;flex-basis:136px}.compass-needle{top:17px;height:50px}.wind-readout{min-width:90px}.wind-readout strong{font-size:17px}.wind-hourly{gap:4px}.wind-hour{padding:7px 2px}.wind-hour b{font-size:10px}}
+@media(max-width:380px){.compass.compass-real{width:116px;height:116px;flex-basis:116px}.compass-needle{top:15px;height:42px}.wind-readout{min-width:82px}.wind-readout strong{font-size:15px}.wind-detail-head .pill{font-size:10px;padding:6px 8px}}
+
+/* V3.2.44 · livello vento confinato nell’overlay pane: popup, marker e controlli restano sopra */
+/* V3.2.18 · rifiniture responsive e accessibilità mobile */
+html{scroll-behavior:smooth;scroll-padding-top:105px;-webkit-text-size-adjust:100%}
+button,a,[role="button"]{-webkit-tap-highlight-color:transparent}
+button:focus-visible,a:focus-visible{outline:3px solid #f0b84b;outline-offset:3px}
+.selector button,.maplink,.lang-switch button{min-height:44px}
+.beach.selected{border-color:var(--sea);box-shadow:0 0 0 2px #087e8b22;background:#f5fbfa}
+#map{touch-action:pan-x pan-y;overscroll-behavior:contain;position:relative}
+.wind-map-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.wind-map-status{position:absolute;z-index:650;top:12px;left:12px;max-width:calc(100% - 76px);padding:9px 12px;border-radius:12px;background:rgba(7,59,76,.92);color:#fff;box-shadow:0 5px 18px #062d3b44;font-size:12px;font-weight:800;line-height:1.35;backdrop-filter:blur(8px);pointer-events:none}
+.wind-map-status small{display:block;font-weight:600;opacity:.82;font-size:10px;margin-top:2px}
+.wind-map-legend{display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:10px 8px 2px;font-size:11px;color:var(--muted)}
+.wind-map-legend span{display:inline-flex;align-items:center;gap:6px}
+.wind-map-legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.wind-map-legend .low{background:#38c8c0}.wind-map-legend .mid{background:#f4b942}.wind-map-legend .high{background:#ff795f}
+@media(max-width:800px){.wind-map-status{top:9px;left:9px;padding:8px 10px;font-size:11px}.wind-map-legend{gap:9px;font-size:10px}}
+.leaflet-control-layers-toggle{width:44px!important;height:44px!important}
+.leaflet-control-zoom a{width:42px!important;height:42px!important;line-height:42px!important;font-size:22px!important}
+@media(max-width:800px){
+  html{scroll-padding-top:122px}
+  header{display:flex;flex-wrap:wrap;gap:10px;padding:10px 4%;}
+  .logo{font-size:13px;letter-spacing:.25px;white-space:nowrap}
+  .lang-switch{margin-left:auto;gap:3px}
+  .lang-switch button{min-width:38px;min-height:40px;padding:7px 8px;font-size:11px}
+  nav{display:flex;order:3;width:100%;gap:7px;overflow-x:auto;overscroll-behavior-x:contain;white-space:nowrap;padding:1px 0 3px;scrollbar-width:none}
+  nav::-webkit-scrollbar{display:none}
+  nav a{flex:0 0 auto;margin:0;padding:9px 12px;border:1px solid #dbe9e8;border-radius:99px;background:#f5fbfa;font-size:12px}
+  .hero{padding:30px 5% 18px}
+  .hero h1{font-size:clamp(38px,11vw,54px);letter-spacing:-1.5px;line-height:1.01;margin:11px 0}
+  .hero p{font-size:15px;line-height:1.5;margin:12px 0 16px}
+  .wrap{margin:14px auto;padding:0 4%}
+  .grid{gap:12px}
+  .card{padding:17px;border-radius:19px}
+  .weather{gap:12px}
+  .temp{font-size:52px}
+  .stats{gap:8px;margin-top:16px}
+  .stat{padding:11px;border-radius:13px;min-width:0}
+  .stat small{font-size:11px}
+  .stat b{font-size:13px;overflow-wrap:anywhere}
+  .compassbox{gap:15px;min-height:150px;justify-content:flex-start}
+  .compass{width:118px;height:118px;flex:0 0 118px}
+  .arrow{left:55px;top:21px;height:43px}
+  .section-title{font-size:26px;line-height:1.1}
+  .section-lead{font-size:14px;line-height:1.5;margin-bottom:16px}
+  .map-card{padding:9px}
+  .map-top{padding:8px 5px 12px;align-items:flex-start}
+  .map-tag{font-size:10px;padding:6px 8px}
+  #map{height:clamp(350px,53svh,500px);border-radius:14px}
+  .map-legend{gap:8px;padding:12px 5px 4px;font-size:11px}
+  .leaflet-control-layers{max-width:calc(100vw - 64px)}
+  .leaflet-control-layers-expanded{padding:8px 10px!important}
+  .selector{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:14px 0 17px}
+  .selector button{padding:10px 6px;border-radius:12px;font-size:14px}
+  .recommendations{grid-template-columns:1fr;gap:9px}
+  .beach{padding:14px;border-radius:15px}
+  .beach h3{font-size:17px;margin:6px 0}
+  .beach p{font-size:13px}
+  .beach .maplink{min-height:44px;padding:10px 13px!important}
+  .matrix{border-radius:14px}
+  th,td{padding:12px;font-size:12px}
+  .cta{padding:22px;border-radius:20px;margin:22px 0 35px}
+  .cta h2{font-size:22px}
+  .cta p{font-size:14px}
+  .cta a{min-height:44px;padding:13px 17px;margin-top:4px}
+  footer{padding:24px 5%;padding-bottom:calc(24px + env(safe-area-inset-bottom));}
+}
+@media(max-width:380px){
+  .logo{font-size:12px}
+  .lang-switch button{min-width:34px;padding:6px}
+  .compass{width:104px;height:104px;flex-basis:104px}
+  .arrow{left:48px;top:18px;height:38px}
+  .compassbox{gap:11px}
+  #compassDirection{font-size:29px!important}
+  .selector{gap:5px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* V3.2.24 · orizzonte mediterraneo animato */
+.weather-main{position:relative;overflow:hidden;border-radius:18px;padding:17px 18px;background:linear-gradient(120deg,#e6f8fa 0%,#f8fcfb 48%,#d8f1f2 100%);isolation:isolate;transition:background 1.2s ease}
+.weather-main>.weather{position:relative;z-index:2}.weather-main>#weatherStatus,.weather-main>#updatedAt{position:relative;z-index:2}.med-horizon{position:absolute;z-index:1;left:0;right:0;bottom:0;height:47px;overflow:hidden;pointer-events:none;background:linear-gradient(to bottom,transparent 0%,#7bc9d055 20%,#2e9fae 48%,#16788d 100%);opacity:.78}.med-horizon:before{content:"";position:absolute;left:-5%;right:-5%;top:12px;height:2px;background:#fff9;box-shadow:0 0 12px #fff9}.med-horizon .horizon-sun{position:absolute;width:35px;height:35px;border-radius:50%;left:72%;top:-15px;background:#ffe4a0;box-shadow:0 0 22px 8px #ffe0a455;animation:horizonSun 7s ease-in-out infinite}.med-horizon .sea-wave{position:absolute;left:-20%;width:140%;height:24px;top:21px;border-top:2px solid #d9ffffa6;border-radius:50%;animation:seaDrift 7s ease-in-out infinite}.med-horizon .sea-wave.wave-two{top:29px;opacity:.65;animation-delay:-3.5s;animation-duration:9s}.weather-main.scene-night .med-horizon{background:linear-gradient(to bottom,transparent 0%,#4d7c9b55 18%,#1d5877 50%,#12354f 100%);opacity:.9}.weather-main.scene-night .med-horizon .horizon-sun{background:#f6e7b0;box-shadow:0 0 20px 7px #d9e5ff33}.weather-main.scene-dusk{background:linear-gradient(135deg,#f4b88f 0%,#f5d1ad 42%,#9dcbd3 100%);color:#17343b}.weather-main.scene-dusk .med-horizon{background:linear-gradient(to bottom,transparent 0%,#eaa27c55 15%,#368fa1 45%,#145c78 100%);opacity:1}.weather-main.scene-dusk .med-horizon .horizon-sun{top:-8px;background:#ffce83;box-shadow:0 0 24px 10px #ffba7555}.weather-main.scene-dusk:after{background:radial-gradient(circle,#ffdfa088 0%,#f6a47a55 42%,transparent 72%)}@keyframes seaDrift{0%,100%{transform:translateX(-2%) scaleY(.9)}50%{transform:translateX(2%) scaleY(1.1)}}@keyframes horizonSun{0%,100%{transform:translateY(0);opacity:.8}50%{transform:translateY(-3px);opacity:1}}
+.weather-main.scene-clear{background:linear-gradient(125deg,#bcecf5 0%,#f5fbf5 53%,#ffe8a8 100%)}
+.weather-main.scene-cloud{background:linear-gradient(125deg,#c7d8e2 0%,#f3f7f7 53%,#d4e3e8 100%)}
+.weather-main.scene-rain{background:linear-gradient(125deg,#a7c5d2 0%,#e5eff2 53%,#b7d4df 100%)}
+.weather-main.scene-storm{background:linear-gradient(125deg,#637c93 0%,#c0d0db 58%,#859eb1 100%)}
+.weather-main.scene-night{background:linear-gradient(125deg,#142d52 0%,#304c76 55%,#586d91 100%);color:#f5f8ff}
+.weather-main.scene-night .condition,.weather-main.scene-night #weatherDescription{color:#e0e9f8}
+.weather-main.scene-night .weather-icon{background:#ffffff1c;border-color:#ffffff42}
+.weather-main.scene-night .temp{background:none;color:#fff;-webkit-text-fill-color:#fff;filter:drop-shadow(0 2px 8px #071a36aa);animation:none}
+.weather-main.scene-night .med-horizon .horizon-sun{display:none}
+.weather-main.scene-night .med-horizon:after{content:"";position:absolute;width:19px;height:19px;right:23%;top:2px;border-radius:50%;background:#e9f1ff;box-shadow:0 0 17px 5px #dceaff66}
+.weather-main.scene-night.scene-night-rain .med-horizon,.weather-main.scene-night.scene-night-storm .med-horizon{filter:saturate(.65);opacity:.75}
+.weather-main.scene-night.scene-night-rain:after,.weather-main.scene-night.scene-night-storm:after{background:radial-gradient(circle,#9bb7d044 0%,#6e91b022 42%,transparent 72%)}
+.weather-main.scene-night.scene-night-fog .med-horizon{opacity:.45}
+.weather-main .temp{font-variant-numeric:tabular-nums;letter-spacing:-.045em;text-shadow:0 1px 0 #ffffff35}
+.weather-main .weather-icon{flex-shrink:0}
+.weather-main:before{content:"";position:absolute;inset:-25% -15%;z-index:-1;background:repeating-linear-gradient(165deg,transparent 0 26px,#ffffff65 27px 29px,transparent 30px 52px);animation:windSweep 8s linear infinite;opacity:.75}
+.weather-main:after{content:"";position:absolute;z-index:-1;width:180px;height:180px;right:-55px;top:-75px;border-radius:50%;background:radial-gradient(circle,#ffffff70 0%,#bce9e855 42%,transparent 70%);animation:weatherPulse 5s ease-in-out infinite}
+.weather-main .temp{display:inline-block;background:linear-gradient(135deg,#087e8b,#19a6b5,#4779a5);background-size:180% 180%;background-clip:text;-webkit-background-clip:text;color:transparent;animation:tempGlow 6s ease-in-out infinite}
+.weather-main .weather-icon{display:inline-flex;align-items:center;justify-content:center;width:58px;height:58px;border-radius:18px;background:#ffffffb8;border:1px solid #ffffff;box-shadow:0 8px 20px #087e8b12;float:right;margin:5px 0 0 12px}
+.weather-main .weather-icon svg{width:44px;height:44px;overflow:visible}
+.weather-icon .sun-core{fill:#ffbf3f;transform-origin:24px 24px;animation:sunBreath 3.6s ease-in-out infinite}
+.weather-icon .sun-rays{stroke:#f4a928;stroke-width:2.5;stroke-linecap:round;transform-origin:24px 24px;animation:sunRotate 22s linear infinite}
+.weather-icon .cloud-shape{fill:#fff;stroke:#8fb8c6;stroke-width:1.3;animation:cloudFloat 4s ease-in-out infinite}
+.weather-icon .moon-shape{fill:#f6e7a7;animation:moonGlow 4s ease-in-out infinite}
+.weather-icon .star-shape{fill:#fff6c9;animation:starTwinkle 2.2s ease-in-out infinite alternate}
+.weather-icon .rain-drop{stroke:#278fbe;stroke-width:2.5;stroke-linecap:round;animation:rainFall 1s linear infinite}
+.weather-icon .rain-drop:nth-of-type(2){animation-delay:.25s}.weather-icon .rain-drop:nth-of-type(3){animation-delay:.5s}
+.weather-icon .snowflake{stroke:#278fbe;stroke-width:2;stroke-linecap:round;animation:snowFall 2.4s ease-in-out infinite}
+.weather-icon .lightning{fill:#ffd44c;stroke:#e5a51c;stroke-width:1;animation:lightningFlash 2.8s infinite}
+.weather-icon .fog-line{stroke:#6c9ba8;stroke-width:2.5;stroke-linecap:round;stroke-dasharray:15 6;animation:fogMove 3s linear infinite}
+@keyframes windSweep{from{transform:translateX(-30px)}to{transform:translateX(30px)}}
+@keyframes weatherPulse{0%,100%{transform:scale(.92);opacity:.65}50%{transform:scale(1.08);opacity:1}}
+@keyframes tempGlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes windDraw{0%{stroke-dashoffset:30;opacity:.35}45%,75%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:-30;opacity:.2}}
+@keyframes sunRotate{to{transform:rotate(360deg)}}@keyframes sunBreath{0%,100%{transform:scale(.94)}50%{transform:scale(1.06)}}
+@keyframes cloudFloat{0%,100%{transform:translateX(-1px)}50%{transform:translateX(2px)}}@keyframes moonGlow{0%,100%{filter:drop-shadow(0 0 1px #fff2b0)}50%{filter:drop-shadow(0 0 5px #fff2b0)}}
+@keyframes starTwinkle{from{opacity:.35;transform:scale(.8)}to{opacity:1;transform:scale(1.15)}}@keyframes rainFall{0%{transform:translateY(-2px);opacity:.3}65%{opacity:1}100%{transform:translateY(5px);opacity:.2}}
+@keyframes snowFall{0%,100%{transform:translateY(-2px);opacity:.55}50%{transform:translateY(3px);opacity:1}}@keyframes lightningFlash{0%,42%,46%,100%{opacity:1}44%{opacity:.15}}
+@keyframes fogMove{from{stroke-dashoffset:0}to{stroke-dashoffset:-42}}
+@media(prefers-reduced-motion:reduce){.weather-main:before,.weather-main:after,.weather-main .temp,.weather-main .weather-icon *{animation:none!important}}
+
+
+/* V3.2.25 · homepage refresh: premium Mediterranean, lightweight CSS only */
+:root{
+  --sea:#087e8b;--sea2:#19a6b5;--sand:#f4eddf;--ink:#17343b;
+  --muted:#607b81;--good:#187a5b;--line:#dbe9e8;
+}
+body{
+  background:
+    radial-gradient(ellipse at 8% 4%,rgba(25,166,181,.10),transparent 32rem),
+    linear-gradient(180deg,#f2fbfa 0,#f8fbf9 46%,#f7f2e8 100%);
+}
+header{
+  padding:16px 5%;
+  margin:12px auto 0;
+  width:min(1400px,calc(100% - 32px));
+  border:1px solid rgba(220,237,235,.9);
+  border-radius:18px;
+  box-shadow:0 8px 30px rgba(23,52,59,.045);
+}
+.logo{font-size:14px;letter-spacing:1.1px}
+nav a{transition:color .18s ease}
+nav a:hover{color:var(--sea)}
+.hero{
+  position:relative;isolation:isolate;overflow:hidden;
+  width:min(1400px,calc(100% - 32px));max-width:1400px;
+  margin:18px auto 0;padding:clamp(36px,5.5vw,76px) clamp(24px,6vw,82px);
+  min-height:300px;border-radius:30px;
+  color:#fff;
+  background:
+    radial-gradient(ellipse at 82% 18%,rgba(76,213,214,.22),transparent 24rem),
+    radial-gradient(ellipse at 92% 100%,rgba(14,116,131,.52),transparent 30rem),
+    linear-gradient(118deg,#102f3a 0%,#0b4653 54%,#087e8b 100%);
+  box-shadow:0 22px 55px rgba(10,67,78,.16);
+}
+.hero:before{
+  content:"";position:absolute;z-index:-1;right:-42px;top:-145px;
+  width:430px;height:430px;border-radius:50%;
+  border:1px solid rgba(207,251,248,.18);
+  box-shadow:0 0 0 34px rgba(207,251,248,.035),0 0 0 76px rgba(207,251,248,.025);
+}
+.hero:after{
+  content:"";position:absolute;z-index:-1;right:5%;bottom:0;
+  width:min(39%,420px);height:46%;
+  background:
+    radial-gradient(ellipse at 65% 8%,rgba(255,226,156,.92) 0 5%,transparent 5.7%),
+    linear-gradient(165deg,transparent 0 31%,rgba(128,220,218,.30) 31.5% 32.5%,transparent 33%),
+    linear-gradient(175deg,transparent 0 43%,rgba(128,220,218,.24) 43.5% 44.5%,transparent 45%),
+    linear-gradient(180deg,transparent 0 50%,rgba(4,32,43,.12) 50% 100%);
+  border-radius:50% 50% 0 0;opacity:.95;
+}
+.hero .eyebrow{color:#8fe7e4;font-size:11px;letter-spacing:2.5px}
+.hero h1{
+  max-width:760px;font-size:clamp(42px,6.4vw,78px);
+  line-height:.98;letter-spacing:-2.8px;margin:18px 0 16px;
+  text-wrap:balance;color:#fff;
+}
+.hero p{max-width:650px;font-size:clamp(15px,1.6vw,18px);color:#d0e8e8;line-height:1.65;margin:0 0 22px}
+.hero .pill{background:rgba(215,255,244,.12);border:1px solid rgba(215,255,244,.20);color:#c7fff0}
+.hero .pill.demo{background:rgba(255,244,220,.13);color:#ffe5a5;border-color:rgba(255,229,165,.23)}
+.wrap{max-width:1400px;padding:0 clamp(16px,4vw,58px);margin-top:26px}
+.grid{gap:18px}
+.card{
+  border-color:rgba(214,232,230,.9);border-radius:24px;
+  box-shadow:0 12px 36px rgba(23,68,75,.055);
+  transition:box-shadow .2s ease,border-color .2s ease;
+}
+.card:hover{box-shadow:0 16px 42px rgba(23,68,75,.075);border-color:#cfe5e3}
+.weather-main{border-radius:18px}
+.stat{border:1px solid #e8f1ef;transition:transform .18s ease}
+.stat:hover{transform:translateY(-2px)}
+.section-title{font-size:clamp(25px,3vw,34px);letter-spacing:-1px}
+.section-lead{max-width:780px}
+.selector button{transition:background .18s ease,color .18s ease,transform .18s ease}
+.selector button:hover{transform:translateY(-1px)}
+.beach{border-color:#e4efed;box-shadow:0 6px 20px rgba(23,68,75,.035);transition:transform .18s ease,box-shadow .18s ease}
+.beach:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(23,68,75,.08)}
+.map-card{padding:14px}
+.map-top{padding:12px 12px 16px}
+.cta{background:linear-gradient(120deg,#143740,#087e8b);box-shadow:0 18px 38px rgba(10,67,78,.14)}
+footer{padding-bottom:36px}
+@media(max-width:800px){
+  header{width:calc(100% - 20px);margin-top:10px;border-radius:14px;gap:10px}
+  .hero{width:calc(100% - 20px);margin-top:12px;min-height:0;padding:35px 24px 38px;border-radius:24px}
+  .hero:before{right:-220px;top:-170px;width:390px;height:390px}
+  .hero:after{right:-4%;width:58%;height:35%;opacity:.5}
+  .hero h1{font-size:clamp(40px,11vw,58px);letter-spacing:-1.8px;max-width:560px}
+  .hero p{font-size:15px;max-width:540px}
+  .wrap{padding:0 10px;margin-top:22px}
+  .grid{gap:14px}
+  .card{padding:18px;border-radius:21px}
+  .map-card{padding:10px}
+  .section-title{margin-bottom:7px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}
+
+
+/* V3.2.27 · pannello meteo essenziale, ispirazione ai portali meteo */
+.weather-main{border-radius:16px;padding:20px 20px 18px;background:#eaf4f8!important;color:#173247!important;box-shadow:inset 0 0 0 1px #d9e7ed;transition:background .35s ease}
+.weather-main .med-horizon,.weather-main:before,.weather-main:after{display:none!important}
+.weather-main>.weather{display:flex;flex-direction:row!important;align-items:center!important;justify-content:space-between;gap:12px}
+.weather-main .condition{color:#536b7a!important}
+.weather-main .temp{display:block;font-size:clamp(48px,7vw,64px);line-height:1.05;font-weight:800;letter-spacing:-.055em;background:none!important;color:#173247!important;-webkit-text-fill-color:#173247!important;filter:none!important;animation:none!important;text-shadow:none!important;margin:8px 0 5px}
+.weather-main #weatherDescription{display:block;font-size:16px;font-weight:650;color:#29495b;margin-top:2px}
+.weather-main #weatherSceneLabel{display:none}
+.weather-main .weather-icon{float:none;margin:0;width:72px;height:72px;flex:0 0 72px;border-radius:50%;background:#ffffff!important;border:1px solid #dce8ed!important;box-shadow:0 3px 12px #17324712!important}
+.weather-main .weather-icon svg{width:52px;height:52px}
+.weather-main.scene-clear{background:#eaf5fb!important}
+.weather-main.scene-cloud{background:#edf1f4!important}
+.weather-main.scene-rain{background:#e6eef3!important}
+.weather-main.scene-storm{background:#e2e8ee!important}
+.weather-main.scene-night{background:#23384f!important;color:#f5f8ff!important;box-shadow:inset 0 0 0 1px #3a536c}
+.weather-main.scene-night .condition,.weather-main.scene-night #weatherDescription{color:#dce8f2!important}
+.weather-main.scene-night .temp{color:#fff!important;-webkit-text-fill-color:#fff!important}
+.weather-main.scene-night .weather-icon{background:#ffffff!important;border-color:#ffffff!important}
+@media(max-width:800px){.weather-main>.weather{flex-direction:row!important;align-items:center!important}.weather-main{padding:17px 16px}.weather-main .temp{font-size:52px}.weather-main .weather-icon{width:64px;height:64px;flex-basis:64px}.weather-main .weather-icon svg{width:46px;height:46px}}
+
+
+/* V3.2.34 · previsioni marine */
+.marine-panel{margin-top:18px;border:1px solid #dcebea;border-radius:18px;background:linear-gradient(145deg,#f8fcfb,#edf7f6);padding:17px}
+.marine-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.marine-head h3{font-size:18px;margin:0 0 4px;color:var(--ink)}
+.marine-current{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.marine-metric{background:#fff;border:1px solid #e3eeec;border-radius:12px;padding:10px;min-width:0}
+.marine-metric small{display:block;font-size:10px;line-height:1.3}
+.marine-metric b{display:block;font-size:16px;margin-top:5px;overflow-wrap:anywhere}
+.marine-subtitle{font-size:12px;font-weight:850;color:#45636a;margin:12px 0 8px}
+.marine-hourly{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.marine-hour{background:#fff;border:1px solid #e3eeec;border-radius:11px;padding:9px 4px;text-align:center;min-width:0}
+.marine-hour time{display:block;font-size:10px;color:var(--muted)}
+.marine-hour .sea-icon{display:block;font-size:17px;line-height:1.5}
+.marine-hour b{display:block;font-size:12px;margin-top:2px}
+.marine-hour small{display:block;font-size:9px;margin-top:3px;line-height:1.3}
+.marine-daily{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.marine-day{background:#fff;border:1px solid #e3eeec;border-radius:12px;padding:10px 6px;text-align:center;min-width:0}
+.marine-day strong{display:block;font-size:12px;text-transform:capitalize}
+.marine-day b{display:block;font-size:17px;margin:5px 0 2px}
+.marine-day small{font-size:10px;line-height:1.4;display:block}
+.marine-note{font-size:10px;line-height:1.45;color:#607b81;margin:12px 1px 0}
+.marine-empty{grid-column:1/-1;font-size:12px;color:var(--muted);padding:8px}
+@media(max-width:430px){.marine-panel{padding:13px}.marine-current{gap:6px}.marine-metric{padding:8px 6px}.marine-metric b{font-size:14px}.marine-hourly{gap:5px}.marine-hour{padding:8px 2px}.marine-hour b{font-size:11px}.marine-day{padding:9px 4px}}
+
+
+/* V3.2.41 · protezione solare e numeri utili */
+.sun-safety{margin-top:12px;padding:15px;border:1px solid #f1dfb6;border-radius:16px;background:linear-gradient(145deg,#fffaf0,#fff3d9);color:#493b22}
+.sun-safety-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.sun-safety-head h3{font-size:17px;margin:0 0 4px;color:#493b22}
+.sun-safety-head small{font-size:11px;color:#806b43}
+.uv-pill{display:inline-flex;align-items:center;justify-content:center;min-width:58px;padding:7px 10px;border-radius:12px;background:#f2c65c;color:#47350d;font-size:19px;font-weight:900;white-space:nowrap}
+.uv-pill.moderate{background:#f5d36a}.uv-pill.high{background:#f4a340;color:#462400}.uv-pill.very-high{background:#e97945;color:#fff}.uv-pill.extreme{background:#b65c91;color:#fff}.uv-pill.low{background:#8ccf9c;color:#173e26}
+.sun-safety-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.sun-safety-stat{background:#fff9;border:1px solid #f1e4c9;border-radius:11px;padding:9px 10px;min-width:0}
+.sun-safety-stat small{display:block;font-size:10px;color:#806b43}.sun-safety-stat b{display:block;font-size:14px;margin-top:4px;color:#493b22}
+.sun-safety-advice{font-size:12px;line-height:1.5;margin:10px 0 0;color:#594a30}
+.sun-safety-advice ul{margin:6px 0 0;padding-left:18px}.sun-safety-advice li{margin:3px 0}
+.sun-safety-note{font-size:10px;line-height:1.45;color:#806b43;margin:10px 0 0}
+.emergency-panel{margin-top:14px;padding:15px;border:1px solid #e4e9ed;border-radius:16px;background:#f8fafb}
+.emergency-panel h3{font-size:17px;margin:0 0 4px;color:var(--ink)}.emergency-lead{font-size:11px;color:var(--muted);margin:0 0 11px}
+.emergency-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.emergency-link{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:54px;padding:9px 11px;background:#fff;border:1px solid #e3eaee;border-radius:11px;color:var(--ink);text-decoration:none}
+.emergency-link b{font-size:16px;white-space:nowrap}.emergency-link span{font-size:11px;line-height:1.25;text-align:right;color:#5d737b}
+.emergency-link.urgent{border-color:#f0d0d0;background:#fffafa}.emergency-link.marine{border-color:#cfe4ec;background:#f4fbfd}
+.emergency-note{font-size:10px;line-height:1.45;color:var(--muted);margin:10px 0 0}
+@media(max-width:430px){.sun-safety,.emergency-panel{padding:12px}.sun-safety-grid{gap:6px}.emergency-grid{gap:6px}.emergency-link{padding:8px;min-height:58px}.emergency-link b{font-size:15px}.emergency-link span{font-size:10px}}
+
+
+/* V3.2.46 · FerryRadar Egadi Live Tracking */
+.ferry-head{display:flex;justify-content:space-between;align-items:center;gap:18px}.ferry-eyebrow{font-size:11px;letter-spacing:1.5px;font-weight:900;color:var(--sea)}.ferry-ship{font-size:58px;filter:drop-shadow(0 7px 10px #174e5b22)}
+.ferry-live-layout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(270px,.8fr);gap:16px;margin-top:18px}.ferry-map-card,.ferry-info-card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 8px 24px rgba(7,59,76,.06)}
+.ferry-map-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}.ferry-map-top strong{font-size:15px}.ferry-map-top span{font-size:11px;color:var(--muted)}#ferryLiveMap{height:390px;min-height:300px;background:linear-gradient(145deg,#d9eef0,#b8dce2)}
+.ferry-live-state{display:flex;align-items:center;gap:9px;padding:11px 14px;background:#fff8e8;color:#76551a;font-size:12px;font-weight:800;border-bottom:1px solid #f0e4c8}.ferry-state-dot{width:9px;height:9px;border-radius:50%;background:#d89a25;box-shadow:0 0 0 4px #d89a2522;flex:none}
+.ferry-info-card{padding:17px;display:flex;flex-direction:column;gap:13px}.ferry-info-card h3{margin:0;font-size:18px}.ferry-info-card p{margin:0;color:var(--muted);font-size:12px;line-height:1.55}.ferry-data-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.ferry-data{padding:11px;border-radius:12px;background:#f3f8f8}.ferry-data small{display:block;color:var(--muted);font-size:10px;margin-bottom:5px}.ferry-data b{font-size:14px;color:var(--ink)}.ferry-provider-link{display:inline-flex;align-items:center;justify-content:center;text-align:center;min-height:44px;padding:10px 13px;border-radius:12px;background:var(--sea);color:#fff;text-decoration:none;font-weight:850;font-size:12px}.ferry-disclaimer{font-size:11px!important;border-top:1px solid var(--line);padding-top:12px}.ferry-route-chips{display:flex;flex-wrap:wrap;gap:7px;padding:12px 14px}.ferry-route-chips span{background:#eef6f6;border:1px solid #dceaea;border-radius:99px;padding:6px 9px;font-size:10px;font-weight:800;color:#31565c}
+@media(max-width:760px){.ferry-live-layout{grid-template-columns:1fr}.ferry-head{align-items:flex-start}.ferry-ship{font-size:42px}#ferryLiveMap{height:330px}.ferry-map-top{align-items:flex-start;flex-direction:column;gap:4px}}
+</style>
+
+<style id="smartcala-emergency-mobile-v339">
+/* V3.2.41 · schede numeri utili: icone e testi adattivi */
+.emergency-grid{grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch}
+.emergency-link{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;justify-content:initial;gap:9px;min-width:0;min-height:68px;padding:10px;text-align:left;overflow:hidden}
+.emergency-icon{display:flex!important;align-items:center;justify-content:center;width:36px;height:36px;flex:0 0 36px;border-radius:11px;background:#eef3f5;font-size:21px;line-height:1;text-align:center;color:inherit}
+.emergency-copy{display:flex!important;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;min-width:0;text-align:left!important;overflow-wrap:anywhere;word-break:normal}
+.emergency-copy b{display:block;font-size:15px;line-height:1.15;white-space:nowrap;letter-spacing:-.02em}
+.emergency-copy>span{display:block;min-width:0;font-size:11px;line-height:1.25;text-align:left!important;color:#5d737b;overflow-wrap:anywhere}
+.emergency-link.urgent .emergency-icon{background:#ffe8e6}
+.emergency-link.fire{border-color:#f1dfc8;background:#fffaf2}.emergency-link.fire .emergency-icon{background:#ffedd4}
+.emergency-link.police{border-color:#d8e3f4;background:#f7faff}.emergency-link.police .emergency-icon{background:#e7efff}
+.emergency-link.marine .emergency-icon{background:#e1f4f8}
+@media(max-width:430px){.emergency-panel{padding:12px}.emergency-grid{gap:7px}.emergency-link{grid-template-columns:32px minmax(0,1fr);gap:7px;padding:8px;min-height:70px}.emergency-icon{width:31px;height:31px;flex-basis:31px;font-size:19px;border-radius:9px}.emergency-copy b{font-size:14px}.emergency-copy>span{font-size:10px;line-height:1.22}}
+@media(max-width:350px){.emergency-grid{grid-template-columns:minmax(0,1fr)}.emergency-link{grid-template-columns:38px minmax(0,1fr)}.emergency-icon{width:36px;height:36px;flex-basis:36px}.emergency-copy b{font-size:15px}.emergency-copy>span{font-size:11px}}
+</style>
+</head>
+<body>
+
+<style>
+.daily-forecast{margin-top:12px;padding:13px 14px 12px;border:1px solid #e2ebef;border-radius:14px;background:#fff;color:#173247}
+.daily-forecast-head{font-size:12px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#647987;margin-bottom:10px}
+.daily-forecast-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.daily-forecast-day{min-width:0;text-align:center;padding:9px 4px 8px;border-radius:11px;background:#f4f8fa}
+.daily-forecast-day .day-name{font-size:11px;font-weight:750;color:#536b7a;text-transform:capitalize}
+.daily-forecast-day .day-icon{font-size:25px;line-height:1.5;margin:3px 0}
+.daily-forecast-day .day-desc{font-size:10px;line-height:1.25;min-height:25px;color:#536b7a}
+.daily-forecast-day .day-temps{font-size:13px;font-weight:800;white-space:nowrap;margin-top:5px}
+.daily-forecast-day .day-temps span{font-weight:600;color:#82929c}
+.daily-forecast-day .day-rain{font-size:10px;color:#397b9a;margin-top:4px;white-space:nowrap}
+.daily-forecast-empty{font-size:12px;color:#71818b;padding:7px 2px}
+.weather-main.scene-night+.daily-forecast{background:#f7f9fc}
+@media(max-width:420px){.daily-forecast{padding:11px 9px}.daily-forecast-grid{gap:5px}.daily-forecast-day{padding:8px 2px}.daily-forecast-day .day-icon{font-size:23px}.daily-forecast-day .day-temps{font-size:12px}}
+
+
+
+/* V3.2.35 · alba e tramonto nel banner meteo */
+.sun-times{display:inline-flex;align-items:center;gap:13px;margin-top:13px;padding:9px 13px;border:1px solid #ffffff80;border-radius:15px;background:linear-gradient(110deg,#ffffffd9,#eaf7f6d9);box-shadow:0 5px 16px #17343b12;backdrop-filter:blur(8px);max-width:100%}.sun-time-item{display:flex;align-items:center;gap:8px;min-width:0}.sun-time-icon{font-size:22px;line-height:1}.sun-time-copy{display:flex;flex-direction:column;gap:2px}.sun-time-copy small{font-size:9px;letter-spacing:1.1px;font-weight:900;color:#527078}.sun-time-copy b{font-size:16px;line-height:1.1;font-weight:850;font-variant-numeric:tabular-nums;color:#17343b}.sun-times-divider{width:1px;height:28px;background:#b8d2d2;flex:0 0 1px}.weather-main.scene-night .sun-times{background:linear-gradient(110deg,#173b58e8,#254d68e8);border-color:#ffffff35}.weather-main.scene-night .sun-time-copy small{color:#d0e1e9}.weather-main.scene-night .sun-time-copy b{color:#fff}.weather-main.scene-night .sun-times-divider{background:#ffffff55}
+@media(max-width:800px){.sun-times{margin-top:11px;padding:8px 11px;gap:11px}.sun-time-icon{font-size:20px}.sun-time-copy b{font-size:15px}.sun-time-copy small{font-size:8px}}
+@media(max-width:360px){.sun-times{gap:8px;padding:8px 9px}.sun-time-icon{font-size:18px}.sun-time-copy b{font-size:14px}}
+
+/* V3.2.34 · nuova identità cromatica Smart Cala — Mediterraneo contemporaneo */
+:root{
+  --sea:#073B4C;--sea2:#00A6A6;--sand:#F4F1EA;--ink:#102F3A;
+  --muted:#607782;--good:#16856B;--line:#DCE8E7;
+  --aqua:#70D6D0;--coral:#FF7A59;
+}
+body{
+  color:var(--ink);
+  background:radial-gradient(ellipse at 5% 0%,rgba(112,214,208,.16),transparent 34rem),
+             linear-gradient(180deg,#F4FAF9 0%,#F7F8F5 54%,#F4F1EA 100%);
+}
+header{
+  background:rgba(255,255,255,.92);border-color:#DCE8E7;
+  box-shadow:0 9px 28px rgba(7,59,76,.07);
+}
+.logo span,.eyebrow,.beach .num{color:var(--sea2)}
+nav a{color:#244653}
+nav a:hover{color:var(--sea2)}
+.hero{
+  background:radial-gradient(ellipse at 84% 16%,rgba(112,214,208,.28),transparent 25rem),
+             radial-gradient(ellipse at 96% 100%,rgba(0,166,166,.32),transparent 29rem),
+             linear-gradient(118deg,#082F40 0%,#073B4C 52%,#087D83 100%);
+  box-shadow:0 24px 58px rgba(7,59,76,.18);
+}
+.hero .eyebrow{color:#8DE8DF}
+.card,.beach{background:#FFFFFF;border-color:#DCE8E7}
+.card{box-shadow:0 12px 34px rgba(7,59,76,.065)}
+.card:hover,.beach:hover{border-color:#A9DCD7}
+.stat,.wind-metrics>div,.wind-hour{background:#F0F7F6;border:1px solid #E2EEEC}
+.pill{background:#E2F5EF;color:#14765F}
+.pill.demo{background:#FFF0DB;color:#89591C}
+.selector button,.lang-switch button{border-color:#C8DEDC;color:#244653;background:#fff}
+.selector button.active,.lang-switch button.active{
+  background:linear-gradient(135deg,#073B4C,#00A6A6);border-color:#00A6A6;color:#fff;
+  box-shadow:0 5px 14px rgba(0,166,166,.2);
+}
+.map-tag{background:#E5F6F3;color:#087D83}
+#map{outline-color:#D0E3E1;background:#E5EFED}
+.dot{background:var(--coral)}
+.note{border-left-color:var(--aqua);background:#EAF7F5;color:#31545D}
+.matrix th{background:#E8F4F2;color:#173F4B}
+.matrix td{border-bottom-color:#EAF0EE}
+.cta{background:linear-gradient(120deg,#082F40,#075A65 72%,#00A6A6);box-shadow:0 18px 38px rgba(7,59,76,.17)}
+.cta a{color:#073B4C}
+.directions-link,.beach-actions .go-cove,.leaflet-popup-content button{
+  background:linear-gradient(120deg,#073B4C,#00A6A6);box-shadow:0 5px 13px rgba(0,166,166,.2)
+}
+.directions-link:hover,.beach-actions .go-cove:hover,.leaflet-popup-content button:hover{background:#075B68}
+.weather-main{border:1px solid #D9E8E8!important}
+.weather-main.scene-clear{background:#E7F5F8!important}
+.weather-main.scene-cloud{background:#EEF2F4!important}
+.weather-main.scene-rain{background:#E7F0F4!important}
+.weather-main.scene-storm{background:#E3EAF0!important}
+.weather-main.scene-night{background:linear-gradient(135deg,#142F49,#233F5A)!important}
+.compass.compass-real{border-color:#B9D9D6}
+.compass-needle{background:linear-gradient(to bottom,var(--coral) 0 50%,#47727D 50% 100%)}
+.compass-needle:before{border-bottom-color:var(--coral)}
+.compass-center{background:var(--sea)}
+.wind-hour .hour-arrow{color:var(--sea2)}
+.cardinal-n{color:var(--coral)}
+@media(max-width:800px){
+  nav a{border-color:#D8E8E5;background:#F2F8F7;color:#244653}
+  .hero{box-shadow:0 14px 32px rgba(7,59,76,.14)}
+}
+@media(prefers-reduced-motion:reduce){.card,.beach,.selector button{transition:none!important}}
+.smart-advice{margin:0 0 16px;padding:17px 18px;border:1px solid #cfe5e2;border-radius:18px;background:linear-gradient(135deg,#f2faf9,#fff);display:grid;grid-template-columns:auto 1fr;gap:13px;align-items:start}
+.smart-advice-icon{width:42px;height:42px;border-radius:13px;background:#d9f1ee;display:grid;place-items:center;font-size:21px}
+.smart-advice h3{margin:0 0 5px;font-size:17px;color:#073B4C}.smart-advice p{margin:0;color:#46616a;font-size:13px;line-height:1.5}
+.smart-advice .advice-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.smart-advice .advice-chip{display:inline-flex;align-items:center;padding:6px 9px;border-radius:99px;background:#e7f1f0;color:#244653;font-size:11px;font-weight:800}
+.smart-advice.caution{background:#fff9ed;border-color:#f1dfb9}.smart-advice.caution .smart-advice-icon{background:#fff0cc}.smart-advice.caution h3{color:#80520b}
+.smart-advice.alert{background:#fff3f1;border-color:#f0d0ca}.smart-advice.alert .smart-advice-icon{background:#ffe1db}.smart-advice.alert h3{color:#963e30}
+@media(max-width:800px){.smart-advice{padding:14px;gap:10px}.smart-advice-icon{width:38px;height:38px}}
+
+
+/* V3.2.41 · banner meteo animato: cielo, mare e fasi solari */
+.weather-main{position:relative;overflow:hidden;isolation:isolate;min-height:174px;transition:background 1.4s ease,color .8s ease,box-shadow .8s ease}
+.weather-main>.weather,.weather-main>#weatherStatus,.weather-main>#updatedAt{position:relative;z-index:4}
+.weather-main .med-horizon{display:block!important;z-index:2;height:48px;opacity:.92;bottom:0;left:0;right:0}
+.weather-main .med-horizon .horizon-sun{display:block!important;left:72%;top:-15px;width:35px;height:35px;animation:horizonSun 6s ease-in-out infinite,sunRiseSet 18s ease-in-out infinite}
+.weather-main .med-horizon .sea-wave{animation:seaDrift 6s ease-in-out infinite}
+.weather-main .med-horizon .wave-two{animation-delay:-3s}
+.weather-main:before{display:block!important;content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.32;background:repeating-linear-gradient(118deg,transparent 0 34px,#ffffff38 35px 36px,transparent 37px 68px);animation:skyFlow 18s linear infinite}
+.weather-main:after{display:block!important;content:"";position:absolute;z-index:1;pointer-events:none;width:210px;height:210px;right:-65px;top:-105px;border-radius:50%;background:radial-gradient(circle,#fff9 0%,#ffffff42 35%,transparent 70%);animation:weatherPulse 6s ease-in-out infinite}
+.weather-main .temp{animation:temperatureShimmer 7s ease-in-out infinite!important}
+.weather-main .weather-icon{position:relative;z-index:4}
+.weather-main .weather-icon svg{overflow:visible}
+.weather-main .weather-icon .sun-core,.weather-main .weather-icon .sun-rays,.weather-main .weather-icon .cloud-shape,.weather-main .weather-icon .moon-shape,.weather-main .weather-icon .star-shape,.weather-main .weather-icon .rain-drop,.weather-main .weather-icon .snowflake,.weather-main .weather-icon .lightning,.weather-main .weather-icon .fog-line{animation-play-state:running!important}
+.weather-main.scene-clear{background:linear-gradient(135deg,#bdebf3 0%,#eaf8f7 50%,#ffe5a4 100%)!important}
+.weather-main.scene-cloud{background:linear-gradient(135deg,#c7dce5 0%,#edf4f5 52%,#cbdde5 100%)!important}
+.weather-main.scene-rain{background:linear-gradient(135deg,#91b6c8 0%,#d9e8ee 54%,#a9c7d5 100%)!important}
+.weather-main.scene-storm{background:linear-gradient(135deg,#536e87 0%,#91a9b9 55%,#536a80 100%)!important;color:#f7fbff!important}
+.weather-main.scene-storm .condition,.weather-main.scene-storm #weatherDescription{color:#f4f8fb!important}
+.weather-main.scene-night{background:radial-gradient(circle at 78% 15%,#536f91 0%,transparent 30%),linear-gradient(135deg,#102943 0%,#1d3d5a 55%,#315873 100%)!important;color:#f5f8ff!important}
+.weather-main.scene-night .condition,.weather-main.scene-night #weatherDescription{color:#e1edf7!important}
+.weather-main.scene-night .temp{color:#fff!important;-webkit-text-fill-color:#fff!important;animation:none!important}
+.weather-main.scene-night .med-horizon{background:linear-gradient(to bottom,transparent 0%,#315d7a66 18%,#17445f 52%,#0c2d48 100%)!important}
+.weather-main.scene-night .med-horizon .horizon-sun{display:none!important}
+.weather-main.scene-night .med-horizon:after{content:"";position:absolute;right:22%;top:-2px;width:20px;height:20px;border-radius:50%;background:#f5efc9;box-shadow:0 0 20px 7px #dceaff66}
+.weather-main.scene-night:before{opacity:.55;background-image:radial-gradient(2px 2px at 12% 22%,#fff 50%,transparent 60%),radial-gradient(1.5px 1.5px at 34% 14%,#fff 50%,transparent 60%),radial-gradient(2px 2px at 57% 29%,#fff 50%,transparent 60%),radial-gradient(1.5px 1.5px at 82% 18%,#fff 50%,transparent 60%),radial-gradient(1.5px 1.5px at 91% 42%,#fff 50%,transparent 60%);background-size:100% 100%;animation:starsTwinkle 4s ease-in-out infinite alternate}
+.weather-main.scene-dawn{background:linear-gradient(125deg,#f7c9a2 0%,#f6e0bd 42%,#b8dce0 100%)!important;color:#173b49!important}
+.weather-main.scene-dawn .med-horizon{background:linear-gradient(to bottom,transparent 0%,#f5bd8d66 15%,#4199a8 50%,#17677d 100%)!important}
+.weather-main.scene-dawn .med-horizon .horizon-sun{top:-8px;background:#fff0b5;box-shadow:0 0 28px 12px #ffd28c99}
+.weather-main.scene-dusk{background:linear-gradient(125deg,#f2a17e 0%,#eebd9e 42%,#829fb5 100%)!important;color:#173b49!important}
+.weather-main.scene-dusk .med-horizon{background:linear-gradient(to bottom,transparent 0%,#ef9c7a66 15%,#347f94 48%,#124e6c 100%)!important}
+.weather-main.scene-dusk .med-horizon .horizon-sun{top:-8px;background:#ffca83;box-shadow:0 0 28px 12px #ffb36d99}
+.weather-main.scene-rain .med-horizon,.weather-main.scene-storm .med-horizon{filter:saturate(.65);opacity:.8}
+.weather-main.scene-night.scene-night-rain:after,.weather-main.scene-night.scene-night-storm:after{background:radial-gradient(circle,#9bb7d044 0%,#6e91b022 42%,transparent 72%)}
+.weather-main .sun-times{position:relative;z-index:4;box-shadow:0 5px 18px #17343b18}
+@keyframes skyFlow{from{background-position:0 0}to{background-position:180px 0}}
+@keyframes sunRiseSet{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes temperatureShimmer{0%,100%{text-shadow:0 1px 0 #ffffff35}50%{text-shadow:0 2px 12px #ffffff70}}
+@keyframes starsTwinkle{0%{opacity:.25}100%{opacity:.7}}
+@media(max-width:800px){.weather-main{min-height:168px;padding-bottom:54px!important}.weather-main .med-horizon{height:43px}.weather-main .sun-times{gap:9px}.weather-main .weather-icon{align-self:flex-start}}
+@media(prefers-reduced-motion:reduce){.weather-main:before,.weather-main:after,.weather-main .temp,.weather-main .weather-icon *,.weather-main .med-horizon *{animation:none!important}}
+
+</style>
+<header><div class="logo">FAVIGNANA <span>WEATHER</span></div><nav><a href="#meteo" data-i18n="navWeather">Meteo</a><a href="#smart-cala" data-i18n="navCala">Dove andare oggi</a><a href="#ferry-radar" data-i18n="navFerry">Live Tracking</a><a href="#tickets" data-i18n="navTickets">Biglietti</a><a href="#mappa" data-i18n="navMap">Mappa</a><a href="#matrice" data-i18n="navMatrix">Matrice vento</a></nav><div class="lang-switch" role="group" aria-label="Seleziona lingua"><button class="active" data-lang="it" aria-label="Italiano" title="Italiano">🇮🇹</button><button data-lang="en" aria-label="English" title="English">🇬🇧</button><button data-lang="de" aria-label="Deutsch" title="Deutsch">🇩🇪</button><button data-lang="fr" aria-label="Français" title="Français">🇫🇷</button></div></header>
+<section class="hero">
+<div class="eyebrow">Smart Cala · Isole Egadi</div>
+<h1>Il vento ti dice<br>dove andare.</h1>
+<p>Le cale consigliate a Favignana in base alla provenienza del vento. Scegli una direzione e scopri l'elenco costruito sulle indicazioni locali.</p>
+<span class="pill demo" id="liveBadge">METEO LIVE · dati in attesa…</span>
+</section>
+<section class="wrap grid" id="meteo">
+<div class="card">
+<div class="weather-main"><div class="med-horizon" aria-hidden="true"><span class="horizon-sun"></span><span class="sea-wave"></span><span class="sea-wave wave-two"></span></div><div class="weather"><div><div class="condition">Favignana · condizioni attuali</div><div class="temp" id="temperature">—°</div><b id="weatherDescription">Dati meteo in attesa…</b><div class="condition" id="weatherSceneLabel" style="font-size:11px;margin-top:5px">Scena meteo dinamica</div><div class="sun-times" id="sunTimes" aria-label="Orari di alba e tramonto"><div class="sun-time-item"><span class="sun-time-icon" aria-hidden="true">🌅</span><span class="sun-time-copy"><small id="sunriseLabel">ALBA</small><b id="sunriseTime">—:—</b></span></div><span class="sun-times-divider" aria-hidden="true"></span><div class="sun-time-item"><span class="sun-time-icon" aria-hidden="true">🌇</span><span class="sun-time-copy"><small id="sunsetLabel">TRAMONTO</small><b id="sunsetTime">—:—</b></span></div></div></div><div class="weather-icon" id="weatherSceneIcon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle class="sun-core" cx="24" cy="24" r="9"/><g class="sun-rays"><path d="M24 3v5M24 40v5M3 24h5M40 24h5M9.2 9.2l3.6 3.6M35.2 35.2l3.6 3.6M38.8 9.2l-3.6 3.6M12.8 35.2l-3.6 3.6"/></g></svg></div></div></div>
+<div class="sun-safety" id="sunSafety" aria-live="polite">
+ <div class="sun-safety-head"><div><h3 id="sunSafetyTitle">☀️ Sole e protezione della pelle</h3><small id="sunSafetySubtitle">Indice UV previsto per oggi · Favignana</small></div><span class="uv-pill" id="uvValue">UV —</span></div>
+ <div class="sun-safety-grid"><div class="sun-safety-stat"><small id="uvRiskLabel">Livello di esposizione</small><b id="uvRisk">Dati in attesa…</b></div><div class="sun-safety-stat"><small id="uvPeakLabel">Picco previsto</small><b id="uvPeak">—</b></div><div class="sun-safety-stat"><small id="uvSpfLabel">Protezione consigliata</small><b id="uvSpf">—</b></div><div class="sun-safety-stat"><small id="uvHoursLabel">Fascia di attenzione</small><b id="uvHours">—</b></div></div>
+ <div class="sun-safety-advice"><b id="uvAdviceTitle">Consigli per oggi</b><ul id="uvAdviceList"><li>Attendi il caricamento dei dati UV.</li></ul></div>
+ <p class="sun-safety-note" id="uvNote">Indice UV da previsione modellistica Open-Meteo: indicazione generale, non misura locale né valutazione medica individuale.</p>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-top:13px"><span class="pill" id="weatherStatus">Connessione in corso</span><p class="condition" id="updatedAt" style="max-width:210px;font-size:13px;margin:2px 0 0">Dati da Open-Meteo</p></div>
+<div class="stats"><div class="stat"><small>Vento da</small><b id="windStat">—</b></div><div class="stat"><small>Velocità</small><b id="windSpeed">— km/h</b></div><div class="stat"><small>Raffiche</small><b id="windGusts">— km/h</b></div><div class="stat"><small>Onde</small><b id="waveHeight">— m</b></div></div>
+<div class="marine-panel" id="marineForecast" aria-live="polite">
+ <div class="marine-head"><div><h3 id="marineTitle">🌊 Condizioni marine</h3><small id="marineLocation">Favignana · modello marino</small></div><span class="pill" id="marineBadge">CARICAMENTO</span></div>
+ <div class="marine-current">
+  <div class="marine-metric"><small id="marineCurrentWaveLabel">Altezza onde</small><b id="marineCurrentWave">— m</b></div>
+  <div class="marine-metric"><small id="marineCurrentTempLabel">Temperatura mare</small><b id="marineCurrentTemp">— °C</b></div>
+  <div class="marine-metric"><small id="marineCurrentPeriodLabel">Periodo onde</small><b id="marineCurrentPeriod">— s</b></div>
+ </div>
+ <div class="marine-subtitle" id="marineHoursTitle">Prossime 24 ore · ogni 3 ore</div>
+ <div class="marine-hourly" id="marineHourly"><div class="marine-empty">Dati marini in attesa…</div></div>
+ <p class="marine-note" id="marineNote">Previsioni modellistiche Open-Meteo. La risoluzione del modello e la rappresentazione delle zone costiere sono limitate: non sono misurazioni locali né indicazioni di sicurezza per la navigazione o il bagno.</p>
+</div>
+<div class="emergency-panel" id="emergencyPanel">
+ <h3 id="emergencyTitle">🆘 Numeri utili ed emergenze</h3><p class="emergency-lead" id="emergencyLead">In caso di pericolo immediato chiama i servizi di emergenza.</p>
+ <div class="emergency-grid">
+  <a class="emergency-link urgent" href="tel:112" aria-label="112 - Numero unico di emergenza"><span class="emergency-icon" aria-hidden="true">🚨</span><span class="emergency-copy"><b>112</b><span id="emergency112">Numero unico di emergenza</span></span></a>
+  <a class="emergency-link urgent" href="tel:118" aria-label="118 - Emergenza sanitaria"><span class="emergency-icon" aria-hidden="true">🚑</span><span class="emergency-copy"><b>118</b><span id="emergency118">Emergenza sanitaria</span></span></a>
+  <a class="emergency-link fire" href="tel:115" aria-label="115 - Vigili del Fuoco"><span class="emergency-icon" aria-hidden="true">🚒</span><span class="emergency-copy"><b>115</b><span id="emergency115">Vigili del Fuoco</span></span></a>
+  <a class="emergency-link police" href="tel:0923921670" aria-label="Polizia Locale Favignana - 0923 921670"><span class="emergency-icon" aria-hidden="true">🚓</span><span class="emergency-copy"><b>0923 921670</b><span id="emergencyPolice">Polizia Locale Favignana</span></span></a>
+  <a class="emergency-link marine" href="tel:1530" aria-label="1530 - Soccorso in mare"><span class="emergency-icon" aria-hidden="true">🛟</span><span class="emergency-copy"><b>1530</b><span id="emergency1530">Soccorso in mare</span></span></a>
+ </div>
+ <p class="emergency-note" id="emergencyNote">Per le emergenze chiama il 112. Il 1530 è il numero per le emergenze in mare. La Polizia Locale risponde al numero comunale negli orari di servizio.</p>
+</div>
+</div>
+<div class="card wind-detail-card">
+<div class="wind-detail-head"><div><div class="condition">Bussola meteorologica · vento reale</div><h2 id="compassDirection" class="wind-bearing">—°</h2><b id="windName">In attesa dei dati</b></div><span class="pill" id="windForce">Beaufort —</span></div>
+<div class="compassbox"><div class="compass compass-real" aria-label="Bussola della direzione reale del vento"><span class="cardinal cardinal-n">N</span><span class="cardinal cardinal-e">E</span><span class="cardinal cardinal-s">S</span><span class="cardinal cardinal-w">W</span><span class="intercardinal inter-ne">NE</span><span class="intercardinal inter-se">SE</span><span class="intercardinal inter-sw">SW</span><span class="intercardinal inter-nw">NW</span><div class="compass-needle" id="arrow"></div><div class="compass-center"></div></div><div class="wind-readout"><div class="condition">Provenienza</div><strong id="windPoint">—</strong><div class="condition" style="margin-top:10px">Velocità media</div><strong id="windExactSpeed">— km/h</strong><div class="condition" style="margin-top:10px">Raffiche</div><strong id="windExactGust">— km/h</strong></div></div>
+<div class="wind-metrics"><div><small>Direzione</small><b id="windDegrees">—°</b></div><div><small>Forza Beaufort</small><b id="beaufortLabel">—</b></div><div><small>Onde</small><b id="waveHeightDetail">— m</b></div><div><small>Periodo onde</small><b id="wavePeriod">— s</b></div><div><small>Direzione onde</small><b id="waveDirection">—</b></div></div>
+<div class="wind-forecast"><div class="wind-forecast-title"><b>Prossime 6 ore</b><span class="condition">Vento previsto</span></div><div id="windHourly" class="wind-hourly"><div class="forecast-empty">Dati in attesa…</div></div></div>
+<p class="condition wind-source-note">La freccia indica la direzione <b>da cui proviene</b> il vento. Dati meteo forniti da Open-Meteo. Previsione soggetta a variazioni.</p>
+</div>
+</section>
+<section class="wrap" id="mappa">
+<h2 class="section-title" data-i18n="mapTitle">Esplora le cale</h2>
+<p class="section-lead" data-i18n="mapLead">Tocca un segnaposto per aprire la scheda della cala. Le coordinate sono indicative e vanno verificate.</p>
+<div class="card map-card"><div class="map-top"><div><b data-i18n="mapLabel">Favignana · vista satellitare</b><p data-i18n="mapSub">Seleziona un punto sulla mappa</p></div><span class="map-tag">SMART CALA · V3.2.45</span></div><div id="map" role="application" aria-label="Mappa interattiva delle cale di Favignana"><div class="wind-map-status" id="windMapStatus">VENTO PER AREA · caricamento dati<small>Ogni zona utilizza i propri dati geografici</small></div></div><div class="wind-map-legend" id="windMapLegend"><span><i class="low"></i> Debole</span><span><i class="mid"></i> Moderato</span><span><i class="high"></i> Forte</span><span>Le particelle mostrano il flusso del vento</span></div><div class="map-legend"><span><i class="dot"></i><span data-i18n="mapLegend">Cala selezionabile</span></span><span data-i18n="mapDisclaimer">Le coordinate sono indicative; verifica sul posto.</span></div><div id="coveDetails" class="note" aria-live="polite">Seleziona un segnaposto per vedere i dettagli della cala.</div></div>
+</section>
+<section class="wrap" id="smart-cala">
+<h2 class="section-title">Dove andare oggi?</h2>
+<p class="section-lead">Seleziona la provenienza del vento. Le cale qui sotto seguono la matrice locale fornita per il progetto; l'elenco non è ordinato per punteggio.</p>
+<div class="selector" id="windSelector"></div>
+<div class="card" style="margin-bottom:16px"><span class="pill" id="recommendationLabel">CALE CONSIGLIATE</span><h2 id="resultTitle" style="margin:13px 0 5px;font-size:28px">Con vento da NE</h2><p class="sub" id="resultSub" style="margin:0">Elenco indicativo basato sulle informazioni locali.</p></div>
+<div class="smart-advice" id="smartAdvice" aria-live="polite"><div class="smart-advice-icon" id="smartAdviceIcon">🧭</div><div><h3 id="smartAdviceTitle">Analisi delle condizioni in corso</h3><p id="smartAdviceText">Smart Cala incrocia direzione e intensità del vento con i dati marini disponibili.</p><div class="advice-meta" id="smartAdviceMeta"></div></div></div>
+<div class="recommendations" id="beachList"></div>
+<div class="note"><b>Nota importante:</b> una cala presente nell'elenco non è garantita come sicura o calma in ogni condizione. Intensità e raffiche del vento, moto ondoso, mareggiate e condizioni locali possono cambiare la situazione. Prima di entrare in acqua, verifica sempre le condizioni reali.</div>
+</section>
+
+<section class="wrap" id="ferry-radar">
+ <div class="ferry-head"><div><span class="ferry-eyebrow">AIS · NAVIGAZIONE IN TEMPO REALE</span><h2 class="section-title">FerryRadar Egadi</h2><p class="section-lead">Segui la posizione delle imbarcazioni in navigazione tra Trapani, Marsala, Favignana, Levanzo e Marettimo, con velocità, rotta e stima di arrivo quando i dati sono disponibili.</p></div><span class="ferry-ship" aria-hidden="true">🚤</span></div>
+ <div class="ferry-live-layout">
+  <div class="ferry-map-card">
+   <div class="ferry-map-top"><strong>Mappa nautica · Trapani, Marsala e Isole Egadi</strong><span>Area di monitoraggio</span></div>
+   <div class="ferry-live-state"><span class="ferry-state-dot"></span><span>Collegamento AIS non ancora configurato · nessuna posizione live mostrata</span></div>
+   <div id="ferryLiveMap" role="img" aria-label="Mappa dell'area marittima delle isole Egadi"></div>
+   <div class="ferry-route-chips"><span>Trapani</span><span>Marsala</span><span>Favignana</span><span>Levanzo</span><span>Marettimo</span></div>
+  </div>
+  <aside class="ferry-info-card">
+   <h3>Dettagli imbarcazione</h3>
+   <p>Quando il segnale AIS sarà disponibile, seleziona un mezzo sulla mappa per visualizzare i suoi dati di navigazione.</p>
+   <div class="ferry-data-grid">
+    <div class="ferry-data"><small>POSIZIONE</small><b>In attesa AIS</b></div>
+    <div class="ferry-data"><small>VELOCITÀ</small><b>— nodi</b></div>
+    <div class="ferry-data"><small>DESTINAZIONE</small><b>—</b></div>
+    <div class="ferry-data"><small>ARRIVO PREVISTO</small><b>—</b></div>
+   </div>
+   <div class="ferry-data"><small>ULTIMO SEGNALE</small><b>Nessun dato ricevuto</b></div>
+   <a class="ferry-provider-link" href="https://traghettiamo24.it/mappa" target="_blank" rel="noopener noreferrer">Apri mappa AIS esterna ↗</a>
+   <p class="ferry-disclaimer">La posizione e l'ETA saranno mostrati come live solo con un feed AIS autorizzato e aggiornato. Se il segnale manca o è datato, l'app distinguerà chiaramente l'ultima posizione nota da un'eventuale stima.</p>
+  </aside>
+ </div>
+</section>
+
+<section class="wrap" id="tickets">
+ <div class="ticket-slide" style="position:relative;overflow:hidden;border-radius:24px;padding:clamp(22px,4vw,38px);background:linear-gradient(125deg,#073B4C 0%,#087e8b 58%,#19a6b5 100%);color:#fff;box-shadow:0 16px 38px rgba(7,59,76,.18)">
+  <div style="display:flex;flex-wrap:wrap;align-items:center;gap:22px;justify-content:space-between">
+   <div style="flex:1 1 280px;min-width:0">
+    <span style="display:inline-block;padding:7px 11px;border-radius:999px;background:rgba(255,255,255,.16);font-size:11px;font-weight:800;letter-spacing:.08em" data-i18n="ticketEyebrow">RAGGIUNGI LE ISOLE EGADI</span>
+    <h2 style="font-size:clamp(25px,4vw,36px);line-height:1.12;margin:16px 0 10px" data-i18n="ticketTitle">La tua vacanza a Favignana inizia dal viaggio</h2>
+    <p style="max-width:650px;color:rgba(255,255,255,.88);line-height:1.6;margin:0 0 18px" data-i18n="ticketText">Puoi raggiungere Favignana con Liberty Lines partendo da Trapani o Marsala. Consulta orari, disponibilità e tariffe aggiornate e acquista il biglietto direttamente sul sito ufficiale.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin:0 0 20px">
+     <span style="border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.1);border-radius:13px;padding:10px 14px;font-weight:700">⚓ <span data-i18n="ticketTrapani">Da Trapani</span></span>
+     <span style="border:1px solid rgba(255,255,255,.32);background:rgba(255,255,255,.1);border-radius:13px;padding:10px 14px;font-weight:700">⚓ <span data-i18n="ticketMarsala">Da Marsala</span></span>
+    </div>
+    <a href="https://www.libertylines.it/" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#fff;color:#073B4C;text-decoration:none;font-weight:800;padding:14px 20px;border-radius:13px;box-shadow:0 6px 18px rgba(0,0,0,.14)"><span data-i18n="ticketButton">Acquista i biglietti online</span> ↗</a>
+    <p style="font-size:12px;color:rgba(255,255,255,.76);margin:13px 0 0" data-i18n="ticketNote">Si apre il sito ufficiale Liberty Lines in una nuova scheda. Verifica sempre orari e disponibilità prima della partenza.</p>
+   </div>
+   <div aria-hidden="true" style="flex:0 1 190px;min-width:125px;text-align:center;font-size:clamp(76px,12vw,116px);filter:drop-shadow(0 8px 10px rgba(0,0,0,.16))">⛴️</div>
+  </div>
+ </div>
+</section>
+\n<section class="wrap" id="matrice">
+<h2 class="section-title">Matrice locale vento → cale</h2>
+<p class="section-lead">Le direzioni N, NE, NW e W riportano la matrice locale concordata. Le altre direzioni presenti nel prototipo sono riferimenti preliminari da confermare. Questa matrice non è una previsione ufficiale delle condizioni del mare.</p>
+<div class="matrix"><table><thead><tr><th>Vento proveniente da</th><th>Nome</th><th>Cale consigliate</th></tr></thead><tbody id="matrixBody"></tbody></table></div>
+<div class="cta"><div><h2 style="margin:0">Meteo e mare aggiornati</h2><p>I dati vengono richiesti a Open-Meteo quando apri la pagina. Le indicazioni sulle cale restano una matrice locale da validare e non costituiscono un avviso di sicurezza.</p></div><a href="#smart-cala">Prova Smart Cala</a></div>
+</section>
+<footer>FAVIGNANA WEATHER · Smart Cala V3.2.49 · Meteo da Open-Meteo (richiede connessione internet).<br>Le coordinate dei punti sono indicative e da verificare. Le cale consigliate non sostituiscono gli avvisi ufficiali né la valutazione delle condizioni sul posto. Mappa satellitare © Esri.</footer>
+
+<script>
+const data = [
+ {dir:"N",name:"Tramontana",beaches:["Cala Azzurra","Grotta Perciata","Lido Burrone","Scivolo","Calamonaci","Marasolo","Cala del Passo","Cala Pirreca","Cala Rotonda","Cala Grande"]},
+ {dir:"NE",name:"Grecale",beaches:["Cala Azzurra","Grotta Perciata","Lido Burrone","Scivolo","Calamonaci","Marasolo","Cala del Passo","Cala Pirreca","Cala Rotonda","Cala Grande"]},
+ {dir:"NW",name:"Maestrale",beaches:["Bue Marino","Cala Azzurra","Grotta Perciata","Lido Burrone","Scivolo","Calamonaci","Marasolo","Cala del Passo","Cala Pirreca","Cala Rotonda","Cala Grande"]},
+ {dir:"W",name:"Ponente",beaches:["Bue Marino","Cala Azzurra","Cala del Passo","Cala Pirreca","Acque Dolci","Cala San Nicola","Scalo Cavallo"]},
+ {dir:"SW",name:"Libeccio",beaches:["Cala del Pozzo","Cala Fumere","Acque Dolci","Sea Club Favignana","Cala San Nicola","Scalo Cavallo","Cala Rossa","Bue Marino"]},
+ {dir:"S",name:"Ostro",beaches:["Cala del Pozzo","Cala Fumere","Acque Dolci","Sea Club Favignana","Cala San Nicola","Cala Rossa"]},
+ {dir:"SE",name:"Scirocco",beaches:["Cala del Pozzo","Cala Fumere","Acque Dolci","Sea Club Favignana","Cala San Nicola","Cala Rossa"]},
+ {dir:"E",name:"Levante",beaches:["Cala Rotonda","Cala Grande","Punta Sottile"]}
+];
+let selected="NE";
+const translations={
+ it:{ticketEyebrow:"RAGGIUNGI LE ISOLE EGADI",ticketTitle:"La tua vacanza a Favignana inizia dal viaggio",ticketText:"Puoi raggiungere Favignana con Liberty Lines partendo da Trapani o Marsala. Consulta orari, disponibilità e tariffe aggiornate e acquista il biglietto direttamente sul sito ufficiale.",ticketTrapani:"Da Trapani",ticketMarsala:"Da Marsala",ticketButton:"Acquista i biglietti online",ticketNote:"Si apre il sito ufficiale Liberty Lines in una nuova scheda. Verifica sempre orari e disponibilità prima della partenza.",navWeather:"Meteo",navCala:"Dove andare oggi",navTickets:"Biglietti",navMap:"Mappa",navMatrix:"Matrice vento",mapTitle:"Esplora le cale",mapLead:"Tocca un segnaposto per aprire la scheda della cala. Le coordinate sono indicative e vanno verificate.",mapLabel:"Favignana · vista satellitare",mapSub:"Seleziona un punto sulla mappa",mapLegend:"Cala selezionabile",mapDisclaimer:"Le coordinate sono indicative; verifica sul posto.",heroText:"Le cale consigliate a Favignana in base alla provenienza del vento. Scegli una direzione e scopri l'elenco costruito sulle indicazioni locali.",demo:"PROTOTIPO · dati meteo dimostrativi",where:"Dove andare oggi?",windHelp:"Seleziona la provenienza del vento. Le cale qui sotto seguono la matrice locale fornita per il progetto; l'elenco non è ordinato per punteggio.",notLive:"Non in tempo reale",mapButton:"Mostra sulla mappa",directionsNow:"Portami alla cala ↗",directions:"Indicazioni con Google Maps ↗",cala:"CALA",windFrom:"Con vento da",listSuffix:"cale nell'elenco locale · nessuna graduatoria di merito."},
+ en:{ticketEyebrow:"REACH THE EGADI ISLANDS",ticketTitle:"Your trip to Favignana starts with the journey",ticketText:"Reach Favignana with Liberty Lines from Trapani or Marsala. Check updated timetables, availability and fares, then buy your ticket directly on the official website.",ticketTrapani:"From Trapani",ticketMarsala:"From Marsala",ticketButton:"Buy tickets online",ticketNote:"The official Liberty Lines website opens in a new tab. Always check schedules and availability before travelling.",navWeather:"Weather",navCala:"Where to go today",navTickets:"Ferry tickets",navMap:"Map",navMatrix:"Wind matrix",mapTitle:"Explore the coves",mapLead:"Tap a marker to open a cove card. Demo satellite map: locations are approximate.",mapLabel:"Favignana · satellite view",mapSub:"Select a point on the map",mapLegend:"Selectable cove",mapDisclaimer:"Locations are approximate; verify on site.",heroText:"Coves suggested for Favignana according to wind direction. Choose a direction to see the local reference list.",demo:"LIVE WEATHER · loading data…",where:"Where to go today?",windHelp:"Choose the wind direction. The list follows the local reference matrix supplied for this project; it is not ranked.",notLive:"Live weather",mapButton:"Show on map",directionsNow:"Take me to this cove ↗",directions:"Get directions with Google Maps ↗",cala:"COVE",windFrom:"With wind from",listSuffix:"coves in the local list · not ranked."},
+ de:{ticketEyebrow:"ZU DEN ÄGADISCHEN INSELN",ticketTitle:"Dein Urlaub auf Favignana beginnt mit der Anreise",ticketText:"Mit Liberty Lines erreichst du Favignana von Trapani oder Marsala. Prüfe aktuelle Fahrpläne, Verfügbarkeit und Preise und kaufe dein Ticket direkt auf der offiziellen Website.",ticketTrapani:"Ab Trapani",ticketMarsala:"Ab Marsala",ticketButton:"Tickets online kaufen",ticketNote:"Die offizielle Website von Liberty Lines öffnet sich in einem neuen Tab. Bitte prüfe Fahrpläne und Verfügbarkeit vor der Reise.",navWeather:"Wetter",navCala:"Wohin heute?",navTickets:"Fährtickets",navMap:"Karte",navMatrix:"Windmatrix",mapTitle:"Buchten entdecken",mapLead:"Tippe auf eine Markierung, um die Buchtkarte zu öffnen. Demo-Satellitenkarte: Positionen sind ungefähr.",mapLabel:"Favignana · Satellitenansicht",mapSub:"Punkt auf der Karte auswählen",mapLegend:"Auswählbare Bucht",mapDisclaimer:"Positionen sind ungefähr; vor Ort prüfen.",heroText:"Empfohlene Buchten auf Favignana je nach Windrichtung. Wähle eine Richtung für die lokale Referenzliste.",demo:"LIVE-WETTER · Daten werden geladen…",where:"Wohin heute?",windHelp:"Wähle die Windrichtung. Die Liste folgt der lokalen Referenzmatrix dieses Projekts und ist nicht bewertet.",notLive:"Nicht live",mapButton:"Auf Karte zeigen",directionsNow:"Bring mich zur Bucht ↗",directions:"Route mit Google Maps ↗",cala:"BUCHT",windFrom:"Bei Wind aus",listSuffix:"Buchten in der lokalen Liste · keine Rangfolge."},
+ fr:{ticketEyebrow:"REJOIGNEZ LES ÎLES ÉGADES",ticketTitle:"Votre séjour à Favignana commence par le voyage",ticketText:"Rejoignez Favignana avec Liberty Lines au départ de Trapani ou de Marsala. Consultez les horaires, les disponibilités et les tarifs à jour, puis achetez votre billet sur le site officiel.",ticketTrapani:"Depuis Trapani",ticketMarsala:"Depuis Marsala",ticketButton:"Acheter les billets en ligne",ticketNote:"Le site officiel de Liberty Lines s’ouvre dans un nouvel onglet. Vérifiez toujours les horaires et les disponibilités avant le départ.",navWeather:"Météo",navCala:"Où aller aujourd’hui ?",navTickets:"Billets",navMap:"Carte",navMatrix:"Matrice des vents",mapTitle:"Explorer les criques",mapLead:"Touchez un repère pour ouvrir la fiche de la crique. Carte satellite de démonstration : positions approximatives.",mapLabel:"Favignana · vue satellite",mapSub:"Sélectionnez un point sur la carte",mapLegend:"Crique sélectionnable",mapDisclaimer:"Positions indicatives ; vérifiez sur place.",heroText:"Criques conseillées à Favignana selon la direction du vent. Choisissez une direction pour consulter la liste locale.",demo:"MÉTÉO EN DIRECT · chargement…",where:"Où aller aujourd’hui ?",windHelp:"Choisissez la provenance du vent. La liste suit la matrice locale de référence du projet et n’est pas classée.",notLive:"Pas en temps réel",mapButton:"Voir sur la carte",directionsNow:"M’emmener à la crique ↗",directions:"Itinéraire avec Google Maps ↗",cala:"CRIQUE",windFrom:"Avec un vent de",listSuffix:"criques dans la liste locale · sans classement."}
+};
+const uiText={
+ it:{headline:"Il vento ti dice<br>dove andare.",weatherNow:"Favignana · condizioni attuali",loading:"Dati meteo in attesa…",scene:"Scena meteo dinamica",connecting:"Connessione in corso",source:"Dati da Open-Meteo",windFrom:"Vento da",speed:"Velocità",gusts:"Raffiche",waves:"Onde",compass:"Bussola meteorologica · vento reale",waiting:"In attesa dei dati",provenance:"Provenienza",average:"Velocità media",direction:"Direzione",beaufort:"Forza Beaufort",wavePeriod:"Periodo onde",waveDirection:"Direzione onde",nextHours:"Prossime 6 ore",forecastWind:"Vento previsto",sourceNote:"La freccia indica la direzione da cui proviene il vento. Dati meteo forniti da Open-Meteo. Previsione soggetta a variazioni.",today:"Dove andare oggi?",recommendLead:"Seleziona la provenienza del vento. Le cale qui sotto seguono la matrice locale fornita per il progetto; l'elenco non è ordinato per punteggio.",recommended:"CALE CONSIGLIATE",indicative:"Elenco indicativo basato sulle informazioni locali.",important:"Nota importante: una cala presente nell'elenco non è garantita come sicura o calma in ogni condizione. Intensità e raffiche del vento, moto ondoso, mareggiate e condizioni locali possono cambiare la situazione. Prima di entrare in acqua, verifica sempre le condizioni reali.",matrixTitle:"Matrice locale vento → cale",matrixLead:"Le direzioni N, NE, NW e W riportano la matrice locale concordata. Le altre direzioni presenti nel prototipo sono riferimenti preliminari da confermare. Questa matrice non è una previsione ufficiale delle condizioni del mare.",matrixFrom:"Vento proveniente da",matrixName:"Nome",matrixCoves:"Cale consigliate",ctaTitle:"Meteo e mare aggiornati",ctaText:"I dati vengono richiesti a Open-Meteo quando apri la pagina. Le indicazioni sulle cale restano una matrice locale da validare e non costituiscono un avviso di sicurezza.",ctaButton:"Prova Smart Cala",footer:"Le coordinate dei punti sono indicative e da verificare. Le cale consigliate non sostituiscono gli avvisi ufficiali né la valutazione delle condizioni sul posto. Mappa satellitare © Esri.",mapSelect:"Seleziona un segnaposto per vedere i dettagli della cala.",mapAria:"Mappa interattiva delle cale di Favignana",mapFailure:"Impossibile caricare la libreria della mappa da Internet. Controlla la connessione e ricarica la pagina.",mapTileFailure:"Le immagini satellitari non rispondono. Puoi scegliere Mappa stradale dai livelli in alto a destra.",weatherLive:"Dati meteo live",weatherUpdated:"METEO LIVE · aggiornato",weatherUnavailable:"Dati non disponibili",weatherUnavailableBadge:"METEO NON DISPONIBILE",weatherRetry:"Impossibile caricare il meteo. Riprova con connessione internet.",forecastUnavailable:"Previsione oraria non disponibile.",updated:"Aggiornato",sourceOpen:"fonte Open-Meteo",notAvailable:"Dati assenti",route:"Indicazioni con Google Maps ↗",approx:"Coordinate indicative · ",included:"Indicata nella matrice locale per vento da ",calm:"Calma",b1:"Bava di vento",b2:"Brezza leggera",b3:"Brezza tesa",b4:"Vento moderato",b5:"Vento teso",b6:"Vento fresco",b7:"Vento forte",b8:"Burrasca",b9:"Burrasca forte",b10:"Tempesta",b11:"Tempesta violenta",b12:"Uragano",clear:"Sereno",few:"Poco nuvoloso",cloudy:"Nuvoloso",fog:"Nebbia",drizzle:"Pioviggine",rain:"Pioggia / rovesci",snow:"Neve",storm:"Temporale",variable:"Condizioni variabili",night:"Cielo serale / notturno",sceneActive:" · animazione attiva",sunScene:"Sole e cielo variabile",cloudScene:"Nuvole in movimento",rainScene:"Pioggia",snowScene:"Neve",fogScene:"Nebbia",stormScene:"Temporale"},
+ en:{headline:"The wind tells you<br>where to go.",weatherNow:"Favignana · current conditions",loading:"Loading weather…",scene:"Dynamic weather scene",connecting:"Connecting",source:"Data from Open-Meteo",windFrom:"Wind from",speed:"Speed",gusts:"Gusts",waves:"Waves",compass:"Weather compass · actual wind",waiting:"Waiting for data",provenance:"Coming from",average:"Average speed",direction:"Direction",beaufort:"Beaufort force",wavePeriod:"Wave period",waveDirection:"Wave direction",nextHours:"Next 6 hours",forecastWind:"Wind forecast",sourceNote:"The arrow shows the direction the wind is coming from. Weather data provided by Open-Meteo. Forecasts may change.",today:"Where to go today?",recommendLead:"Choose the wind direction. The coves below follow this project's local reference matrix; the list is not ranked.",recommended:"RECOMMENDED COVES",indicative:"Indicative list based on local information.",important:"Important: a cove on this list is not guaranteed to be safe or calm in every condition. Wind strength and gusts, waves, rough seas and local conditions can change. Always check actual conditions before entering the water.",matrixTitle:"Local wind → cove matrix",matrixLead:"Directions N, NE, NW and W show the agreed local matrix. The other directions in the prototype are preliminary references that still need confirmation. This is not an official sea-conditions forecast.",matrixFrom:"Wind coming from",matrixName:"Name",matrixCoves:"Recommended coves",ctaTitle:"Updated weather and sea",ctaText:"Data are requested from Open-Meteo when you open the page. Cove suggestions remain a local matrix to be validated and are not a safety warning.",ctaButton:"Try Smart Cala",footer:"Point coordinates are approximate and should be checked. Cove suggestions do not replace official warnings or on-site assessment. Satellite map © Esri.",mapSelect:"Select a marker to see cove details.",mapAria:"Interactive map of Favignana coves",mapFailure:"Unable to load the map library from the Internet. Check your connection and reload the page.",mapTileFailure:"Satellite imagery is unavailable. You can choose Street map from the layers menu at the top right.",weatherLive:"Live weather data",weatherUpdated:"LIVE WEATHER · updated",weatherUnavailable:"Data unavailable",weatherUnavailableBadge:"WEATHER UNAVAILABLE",weatherRetry:"Unable to load weather. Please check your internet connection and try again.",forecastUnavailable:"Hourly forecast unavailable.",updated:"Updated",sourceOpen:"source: Open-Meteo",notAvailable:"No data",route:"Get directions with Google Maps ↗",approx:"Approximate coordinates · ",included:"Included in the local reference list for wind from ",calm:"Calm",b1:"Light air",b2:"Light breeze",b3:"Gentle breeze",b4:"Moderate breeze",b5:"Fresh breeze",b6:"Strong breeze",b7:"Near gale",b8:"Gale",b9:"Strong gale",b10:"Storm",b11:"Violent storm",b12:"Hurricane",clear:"Clear",few:"Mainly clear",cloudy:"Overcast",fog:"Fog",drizzle:"Drizzle",rain:"Rain / showers",snow:"Snow",storm:"Thunderstorm",variable:"Variable conditions",night:"Evening / night sky",sceneActive:" · animation active",sunScene:"Sun and variable sky",cloudScene:"Moving clouds",rainScene:"Rain",snowScene:"Snow",fogScene:"Fog",stormScene:"Thunderstorm"},
+ de:{headline:"Der Wind zeigt dir,<br>wohin du gehen kannst.",weatherNow:"Favignana · aktuelle Bedingungen",loading:"Wetterdaten werden geladen…",scene:"Dynamische Wetterszene",connecting:"Verbindung wird hergestellt",source:"Daten von Open-Meteo",windFrom:"Wind aus",speed:"Geschwindigkeit",gusts:"Böen",waves:"Wellen",compass:"Wetterkompass · aktueller Wind",waiting:"Warte auf Daten",provenance:"Herkunft",average:"Durchschnittsgeschwindigkeit",direction:"Richtung",beaufort:"Beaufort-Stärke",wavePeriod:"Wellenperiode",waveDirection:"Wellenrichtung",nextHours:"Nächste 6 Stunden",forecastWind:"Windvorhersage",sourceNote:"Der Pfeil zeigt die Richtung an, aus der der Wind kommt. Wetterdaten von Open-Meteo. Vorhersagen können sich ändern.",today:"Wohin heute?",recommendLead:"Wähle die Windrichtung. Die Buchten folgen der lokalen Referenzmatrix dieses Projekts; die Liste ist nicht bewertet.",recommended:"EMPFOHLENE BUCHTEN",indicative:"Unverbindliche Liste auf Grundlage lokaler Informationen.",important:"Wichtig: Eine aufgeführte Bucht ist nicht bei allen Bedingungen sicher oder ruhig. Windstärke und Böen, Wellen, Seegang und lokale Bedingungen können sich ändern. Prüfe vor dem Baden immer die tatsächlichen Bedingungen.",matrixTitle:"Lokale Wind → Buchten-Matrix",matrixLead:"Die Richtungen N, NE, NW und W zeigen die vereinbarte lokale Matrix. Die übrigen Richtungen im Prototyp sind vorläufige Angaben, die noch bestätigt werden müssen. Dies ist keine offizielle Seewettervorhersage.",matrixFrom:"Wind aus Richtung",matrixName:"Name",matrixCoves:"Empfohlene Buchten",ctaTitle:"Aktuelles Wetter und Meer",ctaText:"Die Daten werden beim Öffnen der Seite von Open-Meteo abgerufen. Die Buchtenempfehlungen bleiben eine zu überprüfende lokale Matrix und sind keine Sicherheitswarnung.",ctaButton:"Smart Cala testen",footer:"Die Koordinaten sind ungefähr und sollten überprüft werden. Empfehlungen ersetzen weder offizielle Warnungen noch die Einschätzung vor Ort. Satellitenkarte © Esri.",mapSelect:"Wähle eine Markierung, um die Details der Bucht zu sehen.",mapAria:"Interaktive Karte der Buchten von Favignana",mapFailure:"Die Kartenbibliothek konnte nicht aus dem Internet geladen werden. Prüfe die Verbindung und lade die Seite neu.",mapTileFailure:"Satellitenbilder sind nicht verfügbar. Wähle oben rechts in den Ebenen die Straßenkarte.",weatherLive:"Live-Wetterdaten",weatherUpdated:"LIVE-WETTER · aktualisiert",weatherUnavailable:"Daten nicht verfügbar",weatherUnavailableBadge:"WETTER NICHT VERFÜGBAR",weatherRetry:"Wetter konnte nicht geladen werden. Prüfe die Internetverbindung und versuche es erneut.",forecastUnavailable:"Stündliche Vorhersage nicht verfügbar.",updated:"Aktualisiert",sourceOpen:"Quelle Open-Meteo",notAvailable:"Keine Daten",route:"Route mit Google Maps ↗",approx:"Ungefähre Koordinaten · ",included:"In der lokalen Referenzliste für Wind aus ",calm:"Windstille",b1:"Leiser Zug",b2:"Leichte Brise",b3:"Schwache Brise",b4:"Mäßige Brise",b5:"Frische Brise",b6:"Starker Wind",b7:"Steifer Wind",b8:"Stürmischer Wind",b9:"Sturm",b10:"Schwerer Sturm",b11:"Orkanartiger Sturm",b12:"Orkan",clear:"Klar",few:"Heiter bis wolkig",cloudy:"Bewölkt",fog:"Nebel",drizzle:"Nieselregen",rain:"Regen / Schauer",snow:"Schnee",storm:"Gewitter",variable:"Wechselnde Bedingungen",night:"Abend- / Nachthimmel",sceneActive:" · Animation aktiv",sunScene:"Sonne und wechselnde Bewölkung",cloudScene:"Ziehende Wolken",rainScene:"Regen",snowScene:"Schnee",fogScene:"Nebel",stormScene:"Gewitter"},
+ fr:{headline:"Le vent vous indique<br>où aller.",weatherNow:"Favignana · conditions actuelles",loading:"Chargement de la météo…",scene:"Animation météo dynamique",connecting:"Connexion en cours",source:"Données fournies par Open-Meteo",windFrom:"Vent de",speed:"Vitesse",gusts:"Rafales",waves:"Vagues",compass:"Boussole météo · vent réel",waiting:"En attente des données",provenance:"Provenance",average:"Vitesse moyenne",direction:"Direction",beaufort:"Force Beaufort",wavePeriod:"Période des vagues",waveDirection:"Direction des vagues",nextHours:"6 prochaines heures",forecastWind:"Prévision du vent",sourceNote:"La flèche indique la direction d'où vient le vent. Données météo fournies par Open-Meteo. Les prévisions peuvent évoluer.",today:"Où aller aujourd’hui ?",recommendLead:"Choisissez la provenance du vent. Les criques suivent la matrice locale de référence du projet ; la liste n'est pas classée.",recommended:"CRIQUES CONSEILLÉES",indicative:"Liste indicative basée sur les informations locales.",important:"Important : une crique de cette liste n'est pas garantie sûre ou calme dans toutes les conditions. La force du vent, les rafales, les vagues et les conditions locales peuvent changer. Vérifiez toujours les conditions réelles avant de vous baigner.",matrixTitle:"Matrice locale vent → criques",matrixLead:"Les directions N, NE, NW et W reprennent la matrice locale convenue. Les autres directions du prototype sont des indications préliminaires à confirmer. Il ne s’agit pas d’une prévision officielle de l’état de la mer.",matrixFrom:"Vent provenant de",matrixName:"Nom",matrixCoves:"Criques conseillées",ctaTitle:"Météo et mer à jour",ctaText:"Les données sont demandées à Open-Meteo à l'ouverture de la page. Les suggestions de criques restent une matrice locale à valider et ne constituent pas un avis de sécurité.",ctaButton:"Essayer Smart Cala",footer:"Les coordonnées sont indicatives et doivent être vérifiées. Les suggestions ne remplacent pas les alertes officielles ni l'évaluation sur place. Carte satellite © Esri.",mapSelect:"Sélectionnez un repère pour afficher les détails de la crique.",mapAria:"Carte interactive des criques de Favignana",mapFailure:"Impossible de charger la bibliothèque cartographique depuis Internet. Vérifiez la connexion et rechargez la page.",mapTileFailure:"Les images satellite ne répondent pas. Vous pouvez choisir Carte routière dans les calques en haut à droite.",weatherLive:"Données météo en direct",weatherUpdated:"MÉTÉO EN DIRECT · mise à jour",weatherUnavailable:"Données indisponibles",weatherUnavailableBadge:"MÉTÉO INDISPONIBLE",weatherRetry:"Impossible de charger la météo. Vérifiez votre connexion Internet et réessayez.",forecastUnavailable:"Prévision horaire indisponible.",updated:"Mis à jour",sourceOpen:"source Open-Meteo",notAvailable:"Données absentes",route:"Itinéraire avec Google Maps ↗",approx:"Coordonnées approximatives · ",included:"Incluse dans la liste locale pour un vent de ",calm:"Calme",b1:"Très légère brise",b2:"Légère brise",b3:"Petite brise",b4:"Jolie brise",b5:"Bonne brise",b6:"Vent frais",b7:"Grand frais",b8:"Coup de vent",b9:"Fort coup de vent",b10:"Tempête",b11:"Violente tempête",b12:"Ouragan",clear:"Ciel dégagé",few:"Peu nuageux",cloudy:"Couvert",fog:"Brouillard",drizzle:"Bruine",rain:"Pluie / averses",snow:"Neige",storm:"Orage",variable:"Conditions variables",night:"Ciel du soir / de nuit",sceneActive:" · animation active",sunScene:"Soleil et ciel variable",cloudScene:"Nuages en mouvement",rainScene:"Pluie",snowScene:"Neige",fogScene:"Brouillard",stormScene:"Orage"}
+};
+let currentLang="it";
+// Coordinate aggiornate da fonti cartografiche e territoriali consultate il 29/10/2026.
+// Alcuni punti indicano l'area della cala o un accesso vicino, non il perimetro completo della costa.
+const mapPoints=[
+ {name:"Cala Rossa",lat:37.92202,lng:12.36409,description:"Caletta rocciosa nella costa nord-orientale. Coordinate indicative."},
+ {name:"Cala Azzurra",lat:37.9090,lng:12.3613,description:"Baia nella zona sud-orientale. Coordinate indicative da fonte territoriale."},
+ {name:"Bue Marino",lat:37.917736,lng:12.370133,description:"Costa rocciosa con antiche cave di tufo. Coordinate aggiornate da riferimento territoriale."},
+ {name:"Lido Burrone",lat:37.918306,lng:12.338503,description:"Spiaggia sul lato meridionale dell'isola."},
+ {name:"Cala San Nicola",lat:37.934650,lng:12.346520,description:"Insediamento costiero e piccola baia."},
+ {name:"Cala Rotonda",lat:37.923732,lng:12.284346,description:"Posizione fornita dall’utente tramite coordinate."},
+ {name:"Cala del Pozzo",lat:37.946425,lng:12.296929,description:"Posizione fornita dall’utente tramite coordinate Google Maps."},
+ {name:"Punta Sottile",lat:37.935058,lng:12.272267,description:"Promontorio occidentale di Favignana, in prossimità del faro."},
+ {name:"Marasolo",lat:37.9205033,lng:12.3199761,description:"Spiaggia di Marasolo; coordinate dal link Google Maps fornito dall’utente."},
+ {name:"Scalo Cavallo",lat:37.930790,lng:12.349920,description:"Tratto di costa rocciosa sulla costa nord-orientale. Coordinate aggiornate da riferimento territoriale."},
+ {name:"Grotta Perciata",lat:37.91299,lng:12.34651,description:"Grotta e costa rocciosa sul versante sud-orientale. Coordinate cartografiche indicative."},
+ {name:"Scivolo",lat:37.919502,lng:12.336051,description:"Punto di costa rocciosa con lastra inclinata. Coordinate pubblicate per il punto di accesso."},
+ {name:"Calamonaci",lat:37.920188,lng:12.3337747,description:"Spiaggia di Calamonaci; coordinate dal link Google Maps fornito dall’utente."},
+ {name:"Cala del Passo",lat:37.9193025,lng:12.3070559,description:"Spiaggia Cala del Passo; coordinate dal link Google Maps fornito dall’utente."},
+ {name:"Cala Pirreca",lat:37.919218,lng:12.303141,description:"Posizione fornita dall’utente tramite coordinate Google Maps."},
+ {name:"Cala Grande",lat:37.9303387,lng:12.2805009,description:"Baia sul versante occidentale/nord-occidentale. Coordinate cartografiche."},
+ {name:"Cala Trapanese",lat:37.9535144,lng:12.3079383,description:"Spiaggia di Cala Trapanese; coordinate dal link Google Maps fornito dall’utente."},
+ {name:"Cala Fumere",lat:37.9329648,lng:12.3204401,description:"Spiaggia di Calafumere; coordinate ricavate dal link Google Maps fornito dall’utente."},
+ {name:"Acque Dolci",lat:37.938633,lng:12.315654,description:"Posizione aggiornata con le coordinate fornite dall’utente."},
+ {name:"Sea Club Favignana",lat:37.9347897,lng:12.3337623,description:"Posizione aggiornata dalle coordinate del luogo fornite tramite Google Maps."}
+];
+let map=null;const markers={};let windMapCanvas=null,windMapCtx=null,windMapParticles=[],windMapFrame=0,windMapLast=0,windMapState={degrees:null,speed:0,gusts:0};let windGrid=[],windGridLoading=false,windGridTimer=0,windGridLastFetch=0,windGridRequest=0,windGridAbort=null,windGridMoving=false,windGridMeta=null;const windReducedMotion=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function initMap(){
+ if(!window.L){document.getElementById('map').innerHTML='<div style="padding:24px;color:#17343b;font-weight:700">'+(uiText[currentLang]||uiText.it).mapFailure+'</div>';return;}
+ map=L.map('map',{scrollWheelZoom:true,zoomControl:true}).setView([37.9320,12.3220],13);
+ const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri — Sources: Esri, Maxar, Earthstar Geographics',maxZoom:19, crossOrigin:true});
+ // Livello dedicato alle etichette: sopra i flussi del vento, sotto marker e popup.
+ map.createPane('windLabelsPane');
+ map.getPane('windLabelsPane').style.zIndex='550';
+ map.getPane('windLabelsPane').style.pointerEvents='none';
+ const labels=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{attribution:'Labels © Esri',maxZoom:19,opacity:0.95,pane:'windLabelsPane'});
+ const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19});
+ let tileErrors=0, fallbackShown=false;
+ satellite.on('tileerror',()=>{tileErrors++; if(tileErrors>=3&&!fallbackShown){fallbackShown=true; const notice=document.createElement('div');notice.style.cssText='background:#fff3cd;color:#664d03;padding:9px 12px;border-radius:10px;margin:8px 0;font-size:13px';notice.textContent=(uiText[currentLang]||uiText.it).mapTileFailure;document.getElementById('map').insertAdjacentElement('afterend',notice);}});
+ satellite.addTo(map); labels.addTo(map);
+ const layerNames=currentLang==='en'?{sat:'Satellite',street:'Street map',labels:'Names and borders'}:currentLang==='de'?{sat:'Satellit',street:'Straßenkarte',labels:'Namen und Grenzen'}:currentLang==='fr'?{sat:'Satellite',street:'Carte routière',labels:'Noms et limites'}:{sat:'Satellite',street:'Mappa stradale',labels:'Nomi e confini'};
+ L.control.layers({[layerNames.sat]:satellite,[layerNames.street]:street},{[layerNames.labels]:labels},{collapsed:window.matchMedia('(max-width: 800px)').matches,position:'topright'}).addTo(map);
+ mapPoints.forEach(p=>{const marker=L.marker([p.lat,p.lng]).addTo(map);marker.bindPopup(popupContent(p));marker.on('click',()=>selectCove(p.name));markers[p.name]=marker;});
+ initWindMapLayer();
+ setTimeout(()=>{map.invalidateSize(true);resizeWindMapCanvas();requestWindGrid();},150);window.addEventListener("resize",()=>{map.invalidateSize();resizeWindMapCanvas();});map.on("resize",resizeWindMapCanvas);map.on("baselayerchange",()=>setTimeout(()=>map.invalidateSize(true),100));map.on('movestart zoomstart',()=>{windGridMoving=true;windMapParticles.forEach(q=>q.trail=[]);if(windMapCtx&&map)windMapCtx.clearRect(0,0,map.getSize().x,map.getSize().y);});map.on('moveend zoomend',()=>{windGridMoving=false;windMapParticles.forEach(q=>q.trail=[]);requestWindGrid();});document.addEventListener('visibilitychange',()=>{if(document.hidden){if(windMapFrame)cancelAnimationFrame(windMapFrame);windMapFrame=0;}else{if(!windMapFrame)windMapFrame=requestAnimationFrame(drawWindMap);requestWindGrid();}});
+}
+function windMapLabels(){return ({it:{from:'VENTO AL CENTRO MAPPA',toward:'Le particelle seguono la direzione reale del vento',center:'centro mappa',waiting:'VENTO PER AREA · caricamento dati',low:'Debole',mid:'Moderato',high:'Forte',movement:'Flusso animato · velocità legata al vento',source:'Open-Meteo · griglia geografica interpolata · non sono sensori locali',error:'Dati del vento non disponibili per questa vista'},en:{from:'WIND AT MAP CENTRE',toward:'Particles follow the actual wind flow',center:'map centre',waiting:'WIND BY AREA · loading data',low:'Light',mid:'Moderate',high:'Strong',movement:'Animated flow · speed follows the wind',source:'Open-Meteo · interpolated geographic grid · not local sensors',error:'Wind data unavailable for this view'},de:{from:'WIND IN DER KARTENMITTE',toward:'Partikel folgen der tatsächlichen Windströmung',center:'Kartenmitte',waiting:'WIND NACH GEBIET · Daten werden geladen',low:'Schwach',mid:'Mäßig',high:'Stark',movement:'Animierter Fluss · Geschwindigkeit folgt dem Wind',source:'Open-Meteo · interpoliertes geografisches Raster · keine lokalen Sensoren',error:'Winddaten für diese Ansicht nicht verfügbar'},fr:{from:'VENT AU CENTRE DE LA CARTE',toward:'Les particules suivent le flux réel du vent',center:'centre de la carte',waiting:'VENT PAR ZONE · chargement des données',low:'Faible',mid:'Modéré',high:'Fort',movement:'Flux animé · vitesse liée au vent',source:'Open-Meteo · grille géographique interpolée · pas de capteurs locaux',error:'Données de vent indisponibles pour cette vue'}}[currentLang]||{from:'VENTO AL CENTRO MAPPA',toward:'Le particelle seguono la direzione reale del vento',center:'centro mappa',waiting:'VENTO PER AREA · caricamento dati',low:'Debole',mid:'Moderato',high:'Forte',movement:'Flusso animato · velocità legata al vento',source:'Open-Meteo · griglia geografica interpolata · non sono sensori locali',error:'Dati del vento non disponibili per questa vista'});}
+function getWindParticleCount(){const area=map?map.getSize().x*map.getSize().y:320000;const mobile=window.matchMedia&&window.matchMedia('(max-width: 800px)').matches;return Math.max(mobile?150:220,Math.min(mobile?280:420,Math.round(area/(mobile?2600:2200))));}
+function initWindMapLayer(){if(!map||windMapCanvas)return;windMapCanvas=document.createElement('canvas');windMapCanvas.className='wind-map-canvas';windMapCanvas.setAttribute('aria-hidden','true');map.getPanes().overlayPane.appendChild(windMapCanvas);windMapCtx=windMapCanvas.getContext('2d',{alpha:true});resizeWindMapCanvas();windMapParticles=[];for(let i=0;i<getWindParticleCount();i++)windMapParticles.push(newWindParticle());if(!document.hidden&&!windMapFrame)windMapFrame=requestAnimationFrame(drawWindMap);updateWindMapStatus();}
+function resizeWindMapCanvas(){if(!windMapCanvas||!map)return;const r=map.getSize(),dpr=Math.min(window.devicePixelRatio||1,2);windMapCanvas.width=Math.round(r.x*dpr);windMapCanvas.height=Math.round(r.y*dpr);windMapCanvas.style.width=r.x+'px';windMapCanvas.style.height=r.y+'px';windMapCtx.setTransform(dpr,0,0,dpr,0,0);}
+function newWindParticle(){const size=map?map.getSize():{x:600,y:400};return{x:Math.random()*size.x,y:Math.random()*size.y,age:Math.random()*75,maxAge:55+Math.random()*90,trail:[],alpha:.42+Math.random()*.48,speed:0};}
+function updateWindMapStatus(message){const el=document.getElementById('windMapStatus');if(!el)return;const t=windMapLabels();if(message){el.innerHTML=message+'<small>'+t.source+'</small>';return;}if(!windGrid.length){el.innerHTML=t.waiting+'<small>'+t.toward+'</small>';return;}const b=map.getBounds(),center=b.getCenter(),sample=sampleWindAt(center.lat,center.lng);if(!sample){el.innerHTML=t.waiting+'<small>'+t.toward+'</small>';return;}const dir=degreesToDirection(sample.from),stamp=windGridMeta?new Intl.DateTimeFormat(currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT',{hour:'2-digit',minute:'2-digit'}).format(new Date(windGridMeta.fetchedAt)):'';el.innerHTML=t.from+' · '+dir+'<small>'+Math.round(sample.speed)+' km/h · '+t.center+' · '+stamp+'</small>';const legend=document.getElementById('windMapLegend');if(legend)legend.innerHTML='<span><i class="low"></i> '+t.low+' · 0–11 km/h</span><span><i class="mid"></i> '+t.mid+' · 12–29 km/h</span><span><i class="high"></i> '+t.high+' · 30+ km/h</span><span>'+t.movement+'</span><small style="display:block;width:100%;opacity:.8">'+t.source+(windReducedMotion?' · animazione disattivata dalle impostazioni di accessibilità':'')+'</small>';}
+function setMapWind(degrees,speed,gusts){windMapState={degrees:Number(degrees),speed:Math.max(0,Number(speed)||0),gusts:Math.max(0,Number(gusts)||0)};if(!windGrid.length)updateWindMapStatus();}
+function requestWindGrid(){if(!map)return;clearTimeout(windGridTimer);windGridTimer=setTimeout(fetchWindGrid,500);}
+function buildWindGridCoordinates(){const b=map.getBounds(),z=map.getZoom(),sw=b.getSouthWest(),ne=b.getNorthEast(),midLat=(sw.lat+ne.lat)/2;const latSpan=Math.max(.0005,ne.lat-sw.lat),lonSpan=Math.max(.0005,ne.lng-sw.lng);let base=z>=15?.006:z>=13?.012:z>=11?.03:z>=9?.075:z>=7?.2:z>=5?.55:z>=3?1.6:5;let stepLat=Math.max(.0005,Math.min(base,latSpan/5)),stepLon=Math.max(.0005,Math.min(base/Math.max(.15,Math.cos(midLat*Math.PI/180)),lonSpan/5));const marginLat=latSpan*.12,marginLon=lonSpan*.12,south=Math.max(-85,sw.lat-marginLat),north=Math.min(85,ne.lat+marginLat),west=sw.lng-marginLon,east=ne.lng+marginLon;const count=()=>Math.ceil((north-south)/stepLat+1)*Math.ceil((east-west)/stepLon+1);while(count()>96){const factor=Math.sqrt(count()/96)*1.015;stepLat*=factor;stepLon*=factor;}const pts=[];for(let lat=south;lat<=north+stepLat*.25;lat+=stepLat){for(let lon=west;lon<=east+stepLon*.25;lon+=stepLon){if(pts.length>=96)break;const wrapped=((lon+180)%360+360)%360-180;pts.push({lat:Number(lat.toFixed(5)),lng:Number(wrapped.toFixed(5))});}if(pts.length>=96)break;}return pts;}
+async function fetchWindGrid(){
+ if(!map)return;
+ if(windGridAbort){windGridAbort.abort();windGridAbort=null;}
+ const points=buildWindGridCoordinates();
+ if(!points.length)return;
+ const req=++windGridRequest;
+ const bounds=map.getBounds();
+ const requestBounds={south:bounds.getSouth(),north:bounds.getNorth(),west:bounds.getWest(),east:bounds.getEast(),zoom:map.getZoom()};
+ windGridLoading=true;
+ const controller=new AbortController();
+ windGridAbort=controller;
+ let timedOut=false;
+ const timer=setTimeout(()=>{timedOut=true;controller.abort();},20000);
+ try{
+  const lats=points.map(p=>p.lat).join(','),lons=points.map(p=>p.lng).join(',');
+  const url='https://api.open-meteo.com/v1/forecast?latitude='+encodeURIComponent(lats)+'&longitude='+encodeURIComponent(lons)+'&current=wind_speed_10m,wind_direction_10m,wind_gusts_10m&wind_speed_unit=kmh&timezone=auto';
+  const res=await fetch(url,{signal:controller.signal,cache:'default'});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const raw=await res.json();
+  const rows=Array.isArray(raw)?raw:[raw];
+  const liveBounds=map.getBounds();
+  if(req!==windGridRequest||windGridMoving||Math.abs(liveBounds.getSouth()-requestBounds.south)>.0002||Math.abs(liveBounds.getNorth()-requestBounds.north)>.0002||Math.abs(liveBounds.getWest()-requestBounds.west)>.0002||Math.abs(liveBounds.getEast()-requestBounds.east)>.0002||map.getZoom()!==requestBounds.zoom)return;
+  const seen=new Set();
+  const next=rows.map((r,i)=>({lat:Number(r.latitude??points[i]?.lat),lng:Number(r.longitude??points[i]?.lng),speed:Number(r.current?.wind_speed_10m),from:Number(r.current?.wind_direction_10m),gusts:Number(r.current?.wind_gusts_10m)})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lng)&&Number.isFinite(p.speed)&&Number.isFinite(p.from)).filter(p=>{const key=p.lat.toFixed(4)+','+p.lng.toFixed(4);if(seen.has(key))return false;seen.add(key);return true;});
+  if(!next.length)throw new Error('No valid wind points');
+  windGrid=next;
+  windGridLastFetch=Date.now();
+  windGridMeta={fetchedAt:windGridLastFetch,requestedPoints:points.length,validPoints:next.length,zoom:requestBounds.zoom,bounds:requestBounds};
+  windMapParticles=[];
+  for(let i=0;i<getWindParticleCount();i++)windMapParticles.push(newWindParticle());
+  updateWindMapStatus();
+ }catch(e){
+  if(req===windGridRequest&&(timedOut||e.name!=='AbortError')){
+   windGrid=[];
+   windGridMeta=null;
+   updateWindMapStatus(windMapLabels().error);
+  }
+ }finally{
+  clearTimeout(timer);
+  if(req===windGridRequest){windGridLoading=false;windGridAbort=null;}
+ }
+}
+function sampleWindAt(lat,lon){if(!windGrid.length)return null;const cosLat=Math.max(.12,Math.cos(lat*Math.PI/180));let a=null,b=null,c=null,d=null;let da=Infinity,db=Infinity,dc=Infinity,dd=Infinity;for(let i=0;i<windGrid.length;i++){const p=windGrid[i],rawDx=p.lng-lon,wrappedDx=((rawDx+180)%360+360)%360-180,dx=wrappedDx*cosLat,dy=p.lat-lat,dist=dx*dx+dy*dy;if(dist<da){d=c;dd=dc;c=b;dc=db;b=a;db=da;a=p;da=dist;}else if(dist<db){d=c;dd=dc;c=b;dc=db;b=p;db=dist;}else if(dist<dc){d=c;dd=dc;c=p;dc=dist;}else if(dist<dd){d=p;dd=dist;}}const near=[[a,da],[b,db],[c,dc],[d,dd]].filter(x=>x[0]);if(!near.length)return null;if(near[0][1]<1e-10){const p=near[0][0];return{speed:p.speed,from:p.from,gusts:p.gusts};}let u=0,v=0,g=0,total=0;for(const [p,dist] of near){const w=1/Math.max(dist,1e-9),rad=p.from*Math.PI/180;u+=(-Math.sin(rad)*p.speed)*w;v+=(-Math.cos(rad)*p.speed)*w;g+=(p.gusts||p.speed)*w;total+=w;}if(!total)return null;const speed=Math.hypot(u,v),from=(Math.atan2(-u,-v)*180/Math.PI+360)%360;return{speed,from,gusts:g/total};}
+function windParticleColor(speed){if(speed<12)return '#38c8c0';if(speed<30)return '#f4b942';return '#ff795f';}
+function respawnWindParticle(q,size){q.x=Math.random()*size.x;q.y=Math.random()*size.y;q.age=0;q.maxAge=55+Math.random()*90;q.trail=[];q.alpha=.42+Math.random()*.48;q.speed=0;}
+function drawWindMap(ts){if(!windMapCtx||!map){windMapFrame=0;return;}if(document.hidden){windMapFrame=0;return;}const ctx=windMapCtx,size=map.getSize();if(windMapCanvas.width===0||windMapCanvas.height===0)resizeWindMapCanvas();const dt=windMapLast?Math.min((ts-windMapLast)/1000,.04):0;windMapLast=ts;ctx.clearRect(0,0,size.x,size.y);if(!windGridMoving&&windGrid.length&&!windReducedMotion){for(let i=0;i<windMapParticles.length;i++){const q=windMapParticles[i];q.age+=dt*60;if(q.age>q.maxAge||q.x<-12||q.x>size.x+12||q.y<-12||q.y>size.y+12){respawnWindParticle(q,size);continue;}const ll=map.containerPointToLatLng([q.x,q.y]);const w=sampleWindAt(ll.lat,ll.lng);if(!w||w.speed<.7){q.trail=[];continue;}const toward=((w.from+180)%360)*Math.PI/180,vx=Math.sin(toward),vy=-Math.cos(toward);const pxPerSecond=2.5+Math.min(w.speed,65)*.62;q.speed=w.speed;q.x+=vx*pxPerSecond*dt;q.y+=vy*pxPerSecond*dt;q.trail.push({x:q.x,y:q.y,speed:w.speed});if(q.trail.length>13)q.trail.shift();if(q.trail.length<2)continue;ctx.save();ctx.lineCap='round';ctx.lineJoin='round';for(let j=1;j<q.trail.length;j++){const a=q.trail[j-1],b=q.trail[j],fade=j/q.trail.length;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.strokeStyle=windParticleColor((a.speed+b.speed)/2);ctx.globalAlpha=q.alpha*fade*.82;ctx.lineWidth=.7+fade*1.25;ctx.stroke();}const head=q.trail[q.trail.length-1];ctx.globalAlpha=Math.min(.95,q.alpha+.15);ctx.fillStyle=windParticleColor(w.speed);ctx.beginPath();ctx.arc(head.x,head.y,1.25+Math.min(w.speed,35)*.025,0,Math.PI*2);ctx.fill();ctx.restore();}}windMapFrame=requestAnimationFrame(drawWindMap);}
+function googleMapsDirectionsUrl(p){return 'https://www.google.com/maps/dir/?api=1&destination='+encodeURIComponent(p.lat+','+p.lng);}
+function localizedCoveDescription(p){
+ const descriptions={
+ "Cala Rossa":{en:"Rocky cove on the north-eastern coast. Approximate location.",de:"Felsige Bucht an der Nordostküste. Ungefähre Position.",fr:"Crique rocheuse sur la côte nord-est. Position indicative."},
+ "Cala Azzurra":{en:"Bay on the south-eastern side. Approximate location.",de:"Bucht an der Südostseite. Ungefähre Position.",fr:"Baie sur le côté sud-est. Position indicative."},
+ "Bue Marino":{en:"Rocky coastline with old tuff quarries. Updated reference location.",de:"Felsküste mit alten Tuffsteinbrüchen. Aktualisierte Referenzposition.",fr:"Côte rocheuse avec d'anciennes carrières de tuf. Position de référence actualisée."},
+ "Lido Burrone":{en:"Beach on the southern side of the island.",de:"Strand an der Südseite der Insel.",fr:"Plage sur la côte sud de l'île."},
+ "Cala San Nicola":{en:"Coastal settlement and small bay.",de:"Küstensiedlung und kleine Bucht.",fr:"Petit établissement côtier et petite baie."},
+ "Cala Rotonda":{en:"Location supplied by the user through coordinates.",de:"Vom Nutzer anhand von Koordinaten angegebene Position.",fr:"Emplacement fourni par l'utilisateur via des coordonnées."},
+ "Cala del Pozzo":{en:"Location supplied by the user via Google Maps coordinates.",de:"Vom Nutzer über Google-Maps-Koordinaten angegebene Position.",fr:"Emplacement fourni par l'utilisateur via les coordonnées Google Maps."},
+ "Punta Sottile":{en:"Western headland of Favignana, near the lighthouse.",de:"Westliches Kap von Favignana in der Nähe des Leuchtturms.",fr:"Pointe occidentale de Favignana, près du phare."},
+ "Marasolo":{en:"Marasolo beach; coordinates from the Google Maps link supplied by the user.",de:"Strand von Marasolo; Koordinaten aus dem vom Nutzer bereitgestellten Google-Maps-Link.",fr:"Plage de Marasolo ; coordonnées issues du lien Google Maps fourni par l'utilisateur."},
+ "Scalo Cavallo":{en:"Rocky stretch of coastline on the north-eastern side. Updated reference location.",de:"Felsiger Küstenabschnitt im Nordosten. Aktualisierte Referenzposition.",fr:"Portion de côte rocheuse au nord-est. Position de référence actualisée."},
+ "Grotta Perciata":{en:"Cave and rocky coastline on the south-eastern side. Approximate map location.",de:"Grotte und Felsküste an der Südostseite. Ungefähre Kartenposition.",fr:"Grotte et côte rocheuse sur le versant sud-est. Position cartographique indicative."},
+ "Scivolo":{en:"Rocky coastal point with a sloping rock slab. Approximate access location.",de:"Felsiger Küstenpunkt mit schräger Felsplatte. Ungefähre Zugangsstelle.",fr:"Point de côte rocheuse avec une dalle inclinée. Accès approximatif."},
+ "Calamonaci":{en:"Calamonaci beach; coordinates from the Google Maps link supplied by the user.",de:"Strand von Calamonaci; Koordinaten aus dem vom Nutzer bereitgestellten Google-Maps-Link.",fr:"Plage de Calamonaci ; coordonnées issues du lien Google Maps fourni par l'utilisateur."},
+ "Cala del Passo":{en:"Cala del Passo beach; coordinates from the Google Maps link supplied by the user.",de:"Strand Cala del Passo; Koordinaten aus dem vom Nutzer bereitgestellten Google-Maps-Link.",fr:"Plage de Cala del Passo ; coordonnées issues du lien Google Maps fourni par l'utilisateur."},
+ "Cala Pirreca":{en:"Location supplied by the user via Google Maps coordinates.",de:"Vom Nutzer über Google-Maps-Koordinaten angegebene Position.",fr:"Emplacement fourni par l'utilisateur via les coordonnées Google Maps."},
+ "Cala Grande":{en:"Bay on the western / north-western side. Approximate map location.",de:"Bucht an der West- / Nordwestseite. Ungefähre Kartenposition.",fr:"Baie sur le versant ouest / nord-ouest. Position cartographique indicative."},
+ "Cala Trapanese":{en:"Cala Trapanese beach; coordinates from the Google Maps link supplied by the user.",de:"Strand Cala Trapanese; Koordinaten aus dem vom Nutzer bereitgestellten Google-Maps-Link.",fr:"Plage de Cala Trapanese ; coordonnées issues du lien Google Maps fourni par l'utilisateur."},
+ "Cala Fumere":{en:"Calafumere beach; coordinates from the Google Maps link supplied by the user.",de:"Strand Calafumere; Koordinaten aus dem vom Nutzer bereitgestellten Google-Maps-Link.",fr:"Plage de Calafumere ; coordonnées issues du lien Google Maps fourni par l'utilisateur."},
+ "Acque Dolci":{en:"Location updated with the coordinates supplied by the user.",de:"Position anhand der vom Nutzer angegebenen Koordinaten aktualisiert.",fr:"Emplacement mis à jour avec les coordonnées fournies par l'utilisateur."},
+ "Sea Club Favignana":{en:"Location updated using the place coordinates supplied via Google Maps.",de:"Position anhand der über Google Maps bereitgestellten Ortskoordinaten aktualisiert.",fr:"Emplacement mis à jour à partir des coordonnées du lieu fournies via Google Maps."}
+ };
+ return currentLang==='it'?p.description:(descriptions[p.name]?.[currentLang]||p.description);
+}
+function popupContent(p){const label=(translations[currentLang]||translations.it).directions;const approx=(uiText[currentLang]||uiText.it).approx;return '<b>'+p.name+'</b><br>'+localizedCoveDescription(p)+'<br><small>'+approx+'</small><br><a class="directions-link" href="'+googleMapsDirectionsUrl(p)+'" target="_blank" rel="noopener noreferrer">'+label+'</a>';}
+function selectCove(name){const p=mapPoints.find(x=>x.name===name);if(!p)return;const box=document.getElementById('coveDetails');box.dataset.selected='true';box.innerHTML='';const title=document.createElement('b');title.textContent=p.name;const desc=document.createElement('p');desc.style.margin='6px 0';desc.textContent=localizedCoveDescription(p);const coords=document.createElement('small');coords.textContent=(uiText[currentLang]||uiText.it).approx+p.lat.toFixed(4)+', '+p.lng.toFixed(4);const link=document.createElement('a');link.className='directions-link';link.href=googleMapsDirectionsUrl(p);link.target='_blank';link.rel='noopener noreferrer';link.textContent=(translations[currentLang]||translations.it).directions;box.append(title,desc,coords,document.createElement('br'),link);document.querySelectorAll('.beach').forEach(el=>el.classList.toggle('selected',el.querySelector('h3')?.textContent===name));}
+function focusCove(name){const marker=markers[name];if(marker){map.setView(marker.getLatLng(),15);marker.setPopupContent(popupContent(mapPoints.find(p=>p.name===name)));marker.openPopup();selectCove(name);}}
+window.focusCove=focusCove;
+function applyStaticLanguage(){const t=uiText[currentLang]||uiText.it;const headline=document.querySelector('.hero h1');if(headline)headline.innerHTML=t.headline;const put=(sel,key)=>{const el=document.querySelector(sel);if(el)el.textContent=t[key]};
+ put('.weather .condition','weatherNow');
+ const stats=document.querySelectorAll('.stats .stat small');['windFrom','speed','gusts','waves'].forEach((k,i)=>{if(stats[i])stats[i].textContent=t[k]});
+ const windHead=document.querySelector('.wind-detail-head .condition');if(windHead)windHead.textContent=t.compass;
+ const readouts=document.querySelectorAll('.wind-readout .condition');['provenance','average','gusts'].forEach((k,i)=>{if(readouts[i])readouts[i].textContent=t[k]});
+ const metrics=document.querySelectorAll('.wind-metrics small');['direction','beaufort','waves','wavePeriod','waveDirection'].forEach((k,i)=>{if(metrics[i])metrics[i].textContent=t[k]});
+ const forecast=document.querySelector('.wind-forecast-title b');if(forecast)forecast.textContent=t.nextHours;const fw=document.querySelector('.wind-forecast-title .condition');if(fw)fw.textContent=t.forecastWind;
+ const note=document.querySelector('.wind-source-note');if(note)note.textContent=t.sourceNote;
+ put('#smart-cala .section-title','today');put('#smart-cala .section-lead','recommendLead');put('#recommendationLabel','recommended');put('#resultSub','indicative');
+ const important=document.querySelector('#smart-cala .note');if(important)important.textContent=t.important;
+ put('#matrice .section-title','matrixTitle');put('#matrice .section-lead','matrixLead');const th=document.querySelectorAll('#matrice thead th');['matrixFrom','matrixName','matrixCoves'].forEach((k,i)=>{if(th[i])th[i].textContent=t[k]});
+ put('.cta h2','ctaTitle');put('.cta p','ctaText');const cta=document.querySelector('.cta a');if(cta)cta.textContent=t.ctaButton;
+ const foot=document.querySelector('footer');if(foot)foot.innerHTML='FAVIGNANA WEATHER · Smart Cala V3.2.49 · '+(currentLang==='en'?'Weather by Open-Meteo (internet connection required).':currentLang==='de'?'Wetter von Open-Meteo (Internetverbindung erforderlich).':currentLang==='fr'?'Météo par Open-Meteo (connexion Internet requise).':'Meteo da Open-Meteo (richiede connessione internet).')+'<br>'+t.footer;
+ const details=document.getElementById('coveDetails');if(details&&!details.dataset.selected)details.textContent=t.mapSelect;
+ const mapEl=document.getElementById('map');if(mapEl)mapEl.setAttribute('aria-label',t.mapAria);
+}
+function applyLiveWeatherLanguage(){
+ if(!liveWeatherSnapshot){const t=uiText[currentLang]||uiText.it;const st=document.getElementById('weatherStatus');if(st)st.textContent=t.connecting;renderMarineForecast(liveMarineSnapshot);renderSunProtection(null);renderEmergencyCopy();return;}
+ const w=liveWeatherSnapshot,c=w.current,t=uiText[currentLang]||uiText.it,dir=degreesToDirection(c.wind_direction_10m);
+ document.getElementById('weatherDescription').textContent=weatherText(c.weather_code);
+ setWeatherScene(c.weather_code,Number(c.is_day)===1);renderSunTimes(w);renderSunProtection(w);renderEmergencyCopy();
+ document.getElementById('windStat').textContent=dir+' · '+localizedCompassName(dir);
+ setWindDirection(c.wind_direction_10m,c.wind_speed_10m,c.wind_gusts_10m);renderHourly(w);renderDailyForecast();renderMarineForecast(liveMarineSnapshot);
+ const dt=new Date(c.time);document.getElementById('updatedAt').textContent=t.updated+': '+dt.toLocaleString(currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT',{dateStyle:'short',timeStyle:'short'})+' · '+t.sourceOpen;
+ document.getElementById('weatherStatus').textContent=t.weatherLive;document.getElementById('liveBadge').textContent=t.weatherUpdated;
+ if(liveMarineSnapshot&&liveMarineSnapshot.current){const m=liveMarineSnapshot.current;document.getElementById('waveDirection').textContent=m.wave_direction!=null?Math.round(m.wave_direction)+'° · '+degreesToDirection(m.wave_direction):'N/D';}
+}
+function setLanguage(lang){if(!translations[lang])lang='it';currentLang=lang;document.documentElement.lang=lang;try{localStorage.setItem('smartCalaLanguage',lang)}catch(e){}document.querySelectorAll('[data-lang]').forEach(b=>{b.classList.toggle('active',b.dataset.lang===lang);b.setAttribute('aria-pressed',b.dataset.lang===lang?'true':'false')});document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.dataset.i18n;if(translations[lang][k])el.textContent=translations[lang][k];});const t=translations[lang];document.querySelector('.hero p').textContent=t.heroText;document.querySelector('.hero .pill').textContent=t.demo;applyStaticLanguage();render();applyLiveWeatherLanguage();updateWindMapStatus();if(map){Object.entries(markers).forEach(([name,m])=>{const p=mapPoints.find(x=>x.name===name);if(p)m.setPopupContent(popupContent(p));});}}
+
+document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLanguage(b.dataset.lang)));
+try{const savedLang=localStorage.getItem('smartCalaLanguage');if(savedLang&&translations[savedLang])currentLang=savedLang;}catch(e){}
+const compassNames={N:'Tramontana',NE:'Grecale',E:'Levante',SE:'Scirocco',S:'Ostro',SW:'Libeccio',W:'Ponente',NW:'Maestrale'};
+function degreesToDirection(deg){return ['N','NE','E','SE','S','SW','W','NW'][Math.round(((deg%360)+360)%360/45)%8];}
+function localizedCompassName(dir){const names={it:{N:'Tramontana',NE:'Grecale',E:'Levante',SE:'Scirocco',S:'Ostro',SW:'Libeccio',W:'Ponente',NW:'Maestrale'},en:{N:'North',NE:'Northeast',E:'East',SE:'Southeast',S:'South',SW:'Southwest',W:'West',NW:'Northwest'},de:{N:'Nord',NE:'Nordost',E:'Ost',SE:'Südost',S:'Süd',SW:'Südwest',W:'West',NW:'Nordwest'},fr:{N:'Nord',NE:'Nord-est',E:'Est',SE:'Sud-est',S:'Sud',SW:'Sud-ouest',W:'Ouest',NW:'Nord-ouest'}};return (names[currentLang]||names.it)[dir]||dir;}
+function weatherText(code){const t=uiText[currentLang]||uiText.it;if(code===0)return t.clear;if([1,2].includes(code))return t.few;if(code===3)return t.cloudy;if([45,48].includes(code))return t.fog;if([51,53,55,56,57].includes(code))return t.drizzle;if([61,63,65,66,67,80,81,82].includes(code))return t.rain;if([71,73,75,77,85,86].includes(code))return t.snow;if([95,96,99].includes(code))return t.storm;return t.variable;}
+function setWeatherScene(code,isDay){
+ const panel=document.querySelector('.weather-main'), icon=document.getElementById('weatherSceneIcon');
+ if(!panel||!icon)return;
+ const c=Number(code); let scene='scene-cloud', svg='';
+ const t=uiText[currentLang]||uiText.it;
+ // Fase solare locale: alba/tramonto vengono calcolati sui dati giornalieri Open-Meteo.
+ let solarPhase='';
+ try{
+  const daily=liveWeatherSnapshot?.daily;
+  const now=new Date(liveWeatherSnapshot?.current?.time||Date.now()).getTime();
+  const rise=daily?.sunrise?.[0]?new Date(daily.sunrise[0]).getTime():NaN;
+  const set=daily?.sunset?.[0]?new Date(daily.sunset[0]).getTime():NaN;
+  const windowMs=42*60*1000;
+  if(Number.isFinite(rise)&&Math.abs(now-rise)<=windowMs)solarPhase='scene-dawn';
+  else if(Number.isFinite(set)&&Math.abs(now-set)<=windowMs)solarPhase='scene-dusk';
+ }catch(e){}
+
+ const label=document.getElementById('weatherSceneLabel');
+ const isStorm=[95,96,99].includes(c);
+ const isRain=[51,53,55,56,57,61,63,65,66,67,80,81,82].includes(c);
+ const isSnow=[71,73,75,77,85,86].includes(c);
+ const isFog=[45,48].includes(c);
+ const isClear=[0,1,2].includes(c);
+ if(label){
+  const condition=isStorm?t.stormScene:isRain?t.rainScene:isSnow?t.snowScene:isFog?t.fogScene:isClear?t.sunScene:t.cloudScene;
+  label.textContent=(isDay?condition:t.night+' · '+condition)+t.sceneActive;
+ }
+ const cloud='<path class="cloud-shape" d="M10 31h24a7 7 0 0 0 .3-14 11 11 0 0 0-21-1A7.5 7.5 0 0 0 10 31Z"/>';
+ const sun='<g class="sun-rays"><path d="M24 3v5M24 40v5M3 24h5M40 24h5M9.2 9.2l3.6 3.6M35.2 35.2l3.6 3.6M38.8 9.2l-3.6 3.6M12.8 35.2l-3.6 3.6"/></g><circle class="sun-core" cx="24" cy="24" r="8"/>';
+ const moon='<path class="moon-shape" d="M31 7a16 16 0 1 0 10 27A17 17 0 0 1 31 7Z"/><circle class="star-shape" cx="12" cy="12" r="1.5"/><circle class="star-shape" cx="35" cy="13" r="1.2"/>';
+ if(isStorm){scene='scene-storm';svg=cloud+'<path class="lightning" d="M24 25 17 36h6l-2 8 11-14h-7l3-5Z"/><path class="rain-drop" d="m13 34-2 4M36 34l-2 4"/>';}
+ else if(isRain){scene='scene-rain';svg=cloud+'<path class="rain-drop" d="m16 34-2 5M25 35l-2 5M34 34l-2 5"/>'}
+ else if(isSnow){scene='scene-cloud';svg=cloud+'<g class="snowflake"><path d="M15 34v7m-3-5 6 3m0-3-6 3"/></g><g class="snowflake"><path d="M27 34v7m-3-5 6 3m0-3-6 3"/></g>'}
+ else if(isFog){scene='scene-cloud';svg=cloud+'<path class="fog-line" d="M7 36h30M12 41h24"/>'}
+ else if(c===0){scene='scene-clear';svg=sun}
+ else if([1,2].includes(c)){scene='scene-clear';svg=sun+'<path class="cloud-shape" d="M18 36h18a5.5 5.5 0 0 0 0-11 8 8 0 0 0-15-1 5.5 5.5 0 0 0-3 12Z"/>'}
+ else {scene='scene-cloud';svg=cloud}
+ if(!isDay){
+  const nightWeather=scene==='scene-storm'?'scene-night-storm':scene==='scene-rain'?'scene-night-rain':isFog?'scene-night-fog':scene==='scene-cloud'?'scene-night-cloud':'scene-night-clear';
+  panel.classList.remove('scene-clear','scene-cloud','scene-rain','scene-storm','scene-night-clear','scene-night-cloud','scene-night-rain','scene-night-storm','scene-night-fog','scene-dawn','scene-dusk');
+  panel.classList.add('scene-night',nightWeather);
+  svg=moon+(isStorm?cloud+'<path class="lightning" d="M24 25 17 36h6l-2 8 11-14h-7l3-5Z"/><path class="rain-drop" d="m13 34-2 4M36 34l-2 4"/>':isRain?cloud+'<path class="rain-drop" d="m16 34-2 5M25 35l-2 5M34 34l-2 5"/>':isSnow?cloud+'<g class="snowflake"><path d="M15 34v7m-3-5 6 3m0-3-6 3"/></g>':isFog?cloud+'<path class="fog-line" d="M7 36h30M12 41h24"/>':isClear?(c===0?'':'<path class="cloud-shape" d="M18 36h18a5.5 5.5 0 0 0 0-11 8 8 0 0 0-15-1 5.5 5.5 0 0 0-3 12Z"/>'):'');
+ }else{
+  panel.classList.remove('scene-clear','scene-cloud','scene-rain','scene-storm','scene-night','scene-night-clear','scene-night-cloud','scene-night-rain','scene-night-storm','scene-night-fog','scene-dawn','scene-dusk');
+  panel.classList.add(scene);
+ }
+ if(solarPhase && isDay){panel.classList.add(solarPhase);}
+ icon.innerHTML='<svg viewBox="0 0 48 48">'+svg+'</svg>';
+}
+function windForce(speed){const ranges=[0.5,5.6,11.1,19.1,28.1,38.1,49.1,61.1,74.1,88.1,102.1,117.1];let b=0;while(b<ranges.length&&speed>=ranges[b])b++;return Math.min(b,12);}
+function beaufortName(b){const t=uiText[currentLang]||uiText.it;return [t.calm,t.b1,t.b2,t.b3,t.b4,t.b5,t.b6,t.b7,t.b8,t.b9,t.b10,t.b11,t.b12][b]||'—';}
+function setWindDirection(degrees,speed,gusts){const exact=((Number(degrees)%360)+360)%360;const dir=degreesToDirection(exact);document.getElementById('compassDirection').textContent=Math.round(exact)+'°';document.getElementById('windDegrees').textContent=exact.toFixed(0)+'°';document.getElementById('windPoint').textContent=dir+' · '+localizedCompassName(dir);document.getElementById('windName').textContent=localizedCompassName(dir);document.getElementById('windExactSpeed').textContent=Number(speed).toFixed(1)+' km/h';document.getElementById('windExactGust').textContent=Number(gusts).toFixed(1)+' km/h';const b=windForce(Number(speed));document.getElementById('windForce').textContent='Beaufort '+b;document.getElementById('beaufortLabel').textContent=b+' · '+beaufortName(b);document.getElementById('arrow').style.transform='rotate('+exact+'deg)';setMapWind(exact,speed,gusts);}
+function renderHourly(weather){const host=document.getElementById('windHourly');const h=weather.hourly;if(!h||!h.time||!h.wind_speed_10m){host.innerHTML='<div class="forecast-empty">'+(uiText[currentLang]||uiText.it).forecastUnavailable+'</div>';return;}const now=new Date(weather.current.time).getTime();let start=h.time.findIndex(t=>new Date(t).getTime()>=now-30*60*1000);if(start<0)start=0;const items=[];for(let i=start;i<Math.min(start+6,h.time.length);i++){const deg=Number(h.wind_direction_10m[i]||0);const sp=Number(h.wind_speed_10m[i]||0);const gust=Number(h.wind_gusts_10m?.[i]??sp);items.push('<div class="wind-hour"><time>'+new Date(h.time[i]).toLocaleTimeString(currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT',{hour:'2-digit',minute:'2-digit'})+'</time><span class="hour-arrow" style="transform:rotate('+deg+'deg)" title="Vento da '+Math.round(deg)+'°">↑</span><b>'+Math.round(sp)+' km/h</b><small>raff. '+Math.round(gust)+'</small></div>');}host.innerHTML=items.join('')||'<div class="forecast-empty">Previsione oraria non disponibile.</div>';}
+let liveWeatherSnapshot=null,liveMarineSnapshot=null,dailyForecastSnapshot=null;
+function dailyWeatherIcon(code){if(code===0)return '☀️';if([1,2].includes(code))return '🌤️';if(code===3)return '☁️';if([45,48].includes(code))return '🌫️';if([51,53,55,56,57].includes(code))return '🌦️';if([61,63,65,66,67,80,81,82].includes(code))return '🌧️';if([71,73,75,77,85,86].includes(code))return '🌨️';if([95,96,99].includes(code))return '⛈️';return '🌤️';}
+function renderDailyForecast(){
+ const host=document.getElementById('dailyForecastGrid'),title=document.getElementById('dailyForecastTitle');if(!host||!title)return;
+ const labels={it:{title:'PREVISIONI · PROSSIMI 3 GIORNI',rain:'Pioggia',none:'Previsioni non disponibili'},en:{title:'FORECAST · NEXT 3 DAYS',rain:'Rain',none:'Forecast unavailable'},de:{title:'VORHERSAGE · NÄCHSTE 3 TAGE',rain:'Regen',none:'Vorhersage nicht verfügbar'},fr:{title:'PRÉVISIONS · 3 PROCHAINS JOURS',rain:'Pluie',none:'Prévisions indisponibles'}};const l=labels[currentLang]||labels.it;title.textContent=l.title;
+ const d=dailyForecastSnapshot?.daily;if(!d||!d.time||d.time.length<4){host.innerHTML='<div class="daily-forecast-empty">'+l.none+'</div>';return;}
+ const locale=currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT';const cards=[];
+ for(let i=1;i<=3;i++){const date=new Date(d.time[i]+'T12:00:00');const day=date.toLocaleDateString(locale,{weekday:'short'});const code=Number(d.weather_code?.[i]??-1);const desc=weatherText(code);const min=d.temperature_2m_min?.[i],max=d.temperature_2m_max?.[i],rain=d.precipitation_probability_max?.[i];const temps=(max!=null&&min!=null)?Math.round(max)+'° <span>/ '+Math.round(min)+'°</span>':'—';const rainText=rain!=null?l.rain+' '+Math.round(rain)+'%':'';cards.push('<div class="daily-forecast-day"><div class="day-name">'+day+'</div><div class="day-icon" aria-label="'+desc+'">'+dailyWeatherIcon(code)+'</div><div class="day-desc">'+desc+'</div><div class="day-temps">'+temps+'</div><div class="day-rain">'+rainText+'</div></div>');}
+ host.innerHTML=cards.join('');
+}
+const marineLabels={
+ it:{title:'🌊 Condizioni marine · oggi',location:'Favignana · modello marino',loading:'CARICAMENTO',live:'DATI AGGIORNATI',unavailable:'DATI NON DISPONIBILI',wave:'Altezza onde',temp:'Temperatura mare',period:'Periodo onde',hours:'OGGI · OGNI 3 ORE',from:'onde da',none:'Dati marini di oggi non disponibili',note:'Previsioni modellistiche Open-Meteo riferite alla giornata odierna. La risoluzione del modello e la rappresentazione delle zone costiere sono limitate: non sono misurazioni locali né indicazioni di sicurezza per la navigazione o il bagno.'},
+ en:{title:'🌊 Marine conditions · today',location:'Favignana · marine model',loading:'LOADING',live:'DATA UPDATED',unavailable:'DATA UNAVAILABLE',wave:'Wave height',temp:'Sea temperature',period:'Wave period',hours:'TODAY · EVERY 3 HOURS',from:'waves from',none:'Today’s marine data unavailable',note:'Open-Meteo model forecast for today. Model resolution and coastal representation are limited: these are not local measurements or safety guidance for swimming or navigation.'},
+ de:{title:'🌊 Meeresbedingungen · heute',location:'Favignana · Meeresmodell',loading:'LÄDT',live:'DATEN AKTUALISIERT',unavailable:'DATEN NICHT VERFÜGBAR',wave:'Wellenhöhe',temp:'Meerestemperatur',period:'Wellenperiode',hours:'HEUTE · ALLE 3 STUNDEN',from:'Wellen aus',none:'Heutige Meeresdaten nicht verfügbar',note:'Open-Meteo-Modellvorhersage für heute. Modellauflösung und Küstendarstellung sind begrenzt: keine lokalen Messungen und keine Sicherheitshinweise zum Schwimmen oder Navigieren.'},
+ fr:{title:'🌊 Conditions marines · aujourd’hui',location:'Favignana · modèle marin',loading:'CHARGEMENT',live:'DONNÉES À JOUR',unavailable:'DONNÉES INDISPONIBLES',wave:'Hauteur des vagues',temp:'Température de la mer',period:'Période des vagues',hours:'AUJOURD’HUI · TOUTES LES 3 HEURES',from:'vagues de',none:'Données marines du jour indisponibles',note:'Prévisions modélisées Open-Meteo pour aujourd’hui. La résolution du modèle et la représentation des côtes sont limitées : il ne s’agit pas de mesures locales ni de consignes de sécurité pour la baignade ou la navigation.'}
+};
+function renderMarineForecast(data){
+ const l=marineLabels[currentLang]||marineLabels.it;
+ const put=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+ put('marineTitle',l.title);put('marineLocation',l.location);put('marineCurrentWaveLabel',l.wave);put('marineCurrentTempLabel',l.temp);put('marineCurrentPeriodLabel',l.period);put('marineHoursTitle',l.hours);put('marineNote',l.note);
+ const badge=document.getElementById('marineBadge'),hourlyHost=document.getElementById('marineHourly');
+ if(!data){badge.textContent=l.unavailable;hourlyHost.innerHTML='<div class="marine-empty">'+l.none+'</div>';put('marineCurrentWave','N/D');put('marineCurrentTemp','N/D');put('marineCurrentPeriod','N/D');return;}
+ badge.textContent=l.live;const c=data.current||{},h=data.hourly||{};
+ put('marineCurrentWave',c.wave_height!=null?Number(c.wave_height).toFixed(1)+' m':'N/D');put('marineCurrentTemp',c.sea_surface_temperature!=null?Number(c.sea_surface_temperature).toFixed(1)+' °C':'N/D');put('marineCurrentPeriod',c.wave_period!=null?Number(c.wave_period).toFixed(0)+' s':'N/D');
+ const locale=currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT';
+ const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
+ const now=Date.now();let start=Array.isArray(h.time)?h.time.findIndex(t=>new Date(t).getTime()>=now-60*60*1000):-1;if(start<0)start=0;const hourlyCards=[];
+ if(Array.isArray(h.time)){for(let j=0;j<12;j++){const i=start+j*3;if(i>=h.time.length)break;const time=new Date(h.time[i]);const localDate=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(time);if(localDate!==today)break;const wave=h.wave_height?.[i],period=h.wave_period?.[i],dir=h.wave_direction?.[i];if(wave==null&&period==null)continue;hourlyCards.push('<div class="marine-hour"><time>'+time.toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'})+'</time><span class="sea-icon" aria-hidden="true">🌊</span><b>'+(wave!=null?Number(wave).toFixed(1)+' m':'—')+'</b><small>'+(period!=null?Number(period).toFixed(0)+' s':'—')+(dir!=null?'<br>'+l.from+' '+degreesToDirection(dir):'')+'</small></div>');}}
+ hourlyHost.innerHTML=hourlyCards.join('')||'<div class="marine-empty">'+l.none+'</div>';
+}
+const sunSafetyCopy={
+ it:{title:'☀️ Sole e protezione della pelle',subtitle:'Indice UV previsto per oggi · Favignana',risk:'Livello di esposizione',peak:'Picco UV previsto',spf:'Protezione consigliata',hours:'Fascia di attenzione',advice:'Consigli per oggi',note:'Indice UV da previsione modellistica Open-Meteo: indicazione generale, non misura locale né valutazione medica individuale.',waiting:'Dati UV in attesa…',none:'Indice UV non disponibile',low:'Basso',moderate:'Moderato',high:'Alto',veryHigh:'Molto alto',extreme:'Estremo',spfLow:'Protezione secondo sensibilità personale',spf30:'SPF 30 o superiore',spf50:'SPF 50+',hoursLow:'Protezione in base alla sensibilità',hoursModerate:'Dalle 11:00 alle 16:00',hoursHigh:'Evita il sole nelle ore centrali',adviceLow:['Cerca comunque l’ombra nelle ore più luminose.','Usa occhiali da sole e cappello se resti all’aperto.'],adviceModerate:['Applica una protezione solare ad ampio spettro SPF 30 o superiore.','Indossa cappello e occhiali; cerca l’ombra nelle ore centrali.','Riapplica la crema ogni due ore e dopo il bagno.'],adviceHigh:['Preferisci SPF 30–50+, cappello, occhiali e abbigliamento coprente.','Limita l’esposizione diretta nelle ore centrali (circa 11:00–16:00).','Cerca spesso l’ombra e riapplica la protezione ogni due ore e dopo il bagno.'],adviceVeryHigh:['Usa SPF 50+, abbigliamento coprente, cappello e occhiali.','Evita l’esposizione diretta nelle ore centrali e cerca l’ombra.','Proteggi con particolare attenzione bambini e pelle sensibile; riapplica la crema dopo il bagno.'],adviceExtreme:['Evita, se possibile, l’esposizione all’aperto nelle ore centrali.','Se devi uscire, usa SPF 50+, abbigliamento coprente, cappello e occhiali.','Cerca ombra costante: anche esposizioni brevi possono essere intense.']},
+ en:{title:'☀️ Sun & skin protection',subtitle:'UV forecast for today · Favignana',risk:'Exposure level',peak:'Forecast UV peak',spf:'Recommended protection',hours:'Caution period',advice:'Today’s tips',note:'UV index from the Open-Meteo model forecast: general guidance, not a local measurement or individual medical assessment.',waiting:'Waiting for UV data…',none:'UV index unavailable',low:'Low',moderate:'Moderate',high:'High',veryHigh:'Very high',extreme:'Extreme',spfLow:'Protection based on personal sensitivity',spf30:'SPF 30 or higher',spf50:'SPF 50+',hoursLow:'Protect according to personal sensitivity',hoursModerate:'11:00 am–4:00 pm',hoursHigh:'Avoid midday sun',adviceLow:['Seek shade during the brightest hours.','Wear sunglasses and a hat when outdoors.'],adviceModerate:['Apply broad-spectrum SPF 30 or higher.','Wear a hat and sunglasses; seek shade around midday.','Reapply every two hours and after swimming.'],adviceHigh:['Prefer SPF 30–50+, a hat, sunglasses and covering clothing.','Limit direct exposure around midday (about 11:00 am–4:00 pm).','Seek shade often and reapply every two hours and after swimming.'],adviceVeryHigh:['Use SPF 50+, covering clothing, a hat and sunglasses.','Avoid direct exposure around midday and stay in the shade.','Take extra care with children and sensitive skin; reapply after swimming.'],adviceExtreme:['Avoid outdoor exposure around midday if possible.','If outdoors, use SPF 50+, covering clothing, a hat and sunglasses.','Stay in the shade: even brief exposure can be intense.']},
+ de:{title:'☀️ Sonne & Hautschutz',subtitle:'UV-Prognose für heute · Favignana',risk:'Expositionsniveau',peak:'Erwarteter UV-Höchstwert',spf:'Empfohlener Schutz',hours:'Zeitraum mit besonderer Vorsicht',advice:'Tipps für heute',note:'UV-Index aus der Open-Meteo-Modellvorhersage: allgemeine Orientierung, keine lokale Messung oder individuelle medizinische Bewertung.',waiting:'UV-Daten werden geladen…',none:'UV-Index nicht verfügbar',low:'Niedrig',moderate:'Mäßig',high:'Hoch',veryHigh:'Sehr hoch',extreme:'Extrem',spfLow:'Schutz je nach persönlicher Empfindlichkeit',spf30:'LSF 30 oder höher',spf50:'LSF 50+',hoursLow:'Schutz je nach persönlicher Empfindlichkeit',hoursModerate:'11:00–16:00 Uhr',hoursHigh:'Mittagssonne vermeiden',adviceLow:['Suche während der hellsten Stunden Schatten.','Trage im Freien Sonnenbrille und Hut.'],adviceModerate:['Verwende Breitband-Sonnenschutz mit LSF 30 oder höher.','Trage Hut und Sonnenbrille und suche mittags Schatten.','Erneuere den Schutz alle zwei Stunden und nach dem Baden.'],adviceHigh:['Bevorzuge LSF 30–50+, Hut, Sonnenbrille und bedeckende Kleidung.','Begrenze direkte Sonne in den Mittagsstunden (etwa 11–16 Uhr).','Suche häufig Schatten und erneuere den Schutz alle zwei Stunden und nach dem Baden.'],adviceVeryHigh:['Verwende LSF 50+, bedeckende Kleidung, Hut und Sonnenbrille.','Meide direkte Sonne um die Mittagszeit und bleibe im Schatten.','Achte besonders auf Kinder und empfindliche Haut; nach dem Baden erneut eincremen.'],adviceExtreme:['Vermeide nach Möglichkeit den Aufenthalt im Freien um die Mittagszeit.','Falls nötig: LSF 50+, bedeckende Kleidung, Hut und Sonnenbrille.','Bleibe konsequent im Schatten: Auch kurze Exposition kann intensiv sein.']},
+ fr:{title:'☀️ Soleil & protection de la peau',subtitle:'Prévision UV du jour · Favignana',risk:'Niveau d’exposition',peak:'Pic UV prévu',spf:'Protection conseillée',hours:'Période de vigilance',advice:'Conseils pour aujourd’hui',note:'Indice UV issu des prévisions du modèle Open-Meteo : indication générale, ni mesure locale ni évaluation médicale individuelle.',waiting:'En attente des données UV…',none:'Indice UV indisponible',low:'Faible',moderate:'Modéré',high:'Élevé',veryHigh:'Très élevé',extreme:'Extrême',spfLow:'Protection selon la sensibilité personnelle',spf30:'SPF 30 ou plus',spf50:'SPF 50+',hoursLow:'Protection selon la sensibilité personnelle',hoursModerate:'11 h–16 h',hoursHigh:'Éviter le soleil de midi',adviceLow:['Cherchez l’ombre pendant les heures les plus lumineuses.','Portez lunettes de soleil et chapeau à l’extérieur.'],adviceModerate:['Appliquez une protection à large spectre SPF 30 ou plus.','Portez chapeau et lunettes ; recherchez l’ombre vers midi.','Renouvelez toutes les deux heures et après la baignade.'],adviceHigh:['Préférez SPF 30–50+, chapeau, lunettes et vêtements couvrants.','Limitez l’exposition directe aux heures centrales (environ 11 h–16 h).','Recherchez souvent l’ombre et renouvelez la protection toutes les deux heures et après la baignade.'],adviceVeryHigh:['Utilisez SPF 50+, vêtements couvrants, chapeau et lunettes.','Évitez l’exposition directe autour de midi et restez à l’ombre.','Protégez particulièrement les enfants et les peaux sensibles ; réappliquez après la baignade.'],adviceExtreme:['Évitez si possible de rester dehors aux heures centrales.','Si vous sortez, utilisez SPF 50+, vêtements couvrants, chapeau et lunettes.','Restez à l’ombre : même une exposition brève peut être intense.']}
+};
+function renderSunProtection(weather){
+ const t=sunSafetyCopy[currentLang]||sunSafetyCopy.it;const put=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+ put('sunSafetyTitle',t.title);put('sunSafetySubtitle',t.subtitle);put('uvRiskLabel',t.risk);put('uvPeakLabel',t.peak);put('uvSpfLabel',t.spf);put('uvHoursLabel',t.hours);put('uvAdviceTitle',t.advice);put('uvNote',t.note);
+ const pill=document.getElementById('uvValue'),list=document.getElementById('uvAdviceList');
+ const d=weather?.daily,h=weather?.hourly;const peakRaw=d?.uv_index_max?.[0];
+ if(peakRaw==null||!Number.isFinite(Number(peakRaw))){pill.textContent='UV —';pill.className='uv-pill';put('uvRisk',t.none);put('uvPeak','—');put('uvSpf','—');put('uvHours','—');list.innerHTML='<li>'+t.none+'</li>';return;}
+ const peak=Number(peakRaw);const now=new Date(weather.current?.time||Date.now());let uvPeakHour=null,uvPeakHourly=-1;
+ const dateKey=d=>new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Rome',year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+ if(Array.isArray(h?.time)&&Array.isArray(h?.uv_index)){for(let i=0;i<h.time.length;i++){const at=new Date(h.time[i]);if(dateKey(at)!==dateKey(now))continue;const value=Number(h.uv_index[i]);if(Number.isFinite(value)&&value>uvPeakHourly){uvPeakHourly=value;uvPeakHour=h.time[i];}}}
+ if(uvPeakHourly<0||Math.abs(uvPeakHourly-peak)>0.6)uvPeakHour=null;
+ let level,key,spf,hours,adviceKey,cls;
+ if(peak<3){level=t.low;key='low';spf=t.spfLow;hours=t.hoursLow;adviceKey='adviceLow';cls='low';}
+ else if(peak<6){level=t.moderate;key='moderate';spf=t.spf30;hours=t.hoursModerate;adviceKey='adviceModerate';cls='moderate';}
+ else if(peak<8){level=t.high;key='high';spf=t.spf30;hours=t.hoursHigh;adviceKey='adviceHigh';cls='high';}
+ else if(peak<11){level=t.veryHigh;key='veryHigh';spf=t.spf50;hours=t.hoursHigh;adviceKey='adviceVeryHigh';cls='very-high';}
+ else{level=t.extreme;key='extreme';spf=t.spf50;hours=t.hoursHigh;adviceKey='adviceExtreme';cls='extreme';}
+ pill.textContent='UV '+peak.toFixed(1);pill.className='uv-pill '+cls;put('uvRisk',level);const peakTime=uvPeakHour?new Date(uvPeakHour).toLocaleTimeString(currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Rome'}):null;put('uvPeak',peak.toFixed(1)+(peakTime?' · '+peakTime:''));put('uvSpf',spf);put('uvHours',hours);
+ list.innerHTML='';(t[adviceKey]||t.adviceModerate).forEach(line=>{const li=document.createElement('li');li.textContent=line;list.appendChild(li);});
+}
+const emergencyCopy={it:{title:'🆘 Numeri utili ed emergenze',lead:'In caso di pericolo immediato chiama i servizi di emergenza.',n112:'Numero unico di emergenza',n118:'Emergenza sanitaria',n115:'Vigili del Fuoco',police:'Polizia Locale Favignana',n1530:'Soccorso in mare',note:'Per le emergenze chiama il 112. Il 1530 è il numero per le emergenze in mare. La Polizia Locale risponde al numero comunale negli orari di servizio.'},en:{title:'🆘 Useful numbers & emergencies',lead:'In an immediate emergency, call the emergency services.',n112:'Single European emergency number',n118:'Medical emergency',n115:'Fire brigade',police:'Favignana Local Police',n1530:'Maritime rescue',note:'For emergencies call 112. Call 1530 for emergencies at sea. The local police number is available during service hours.'},de:{title:'🆘 Wichtige Nummern & Notfälle',lead:'Bei unmittelbarer Gefahr bitte den Notruf wählen.',n112:'Einheitliche europäische Notrufnummer',n118:'Medizinischer Notfall',n115:'Feuerwehr',police:'Ortspolizei Favignana',n1530:'Seenotrettung',note:'In Notfällen 112 wählen. Für Notfälle auf See 1530 anrufen. Die örtliche Polizei ist während der Dienstzeiten erreichbar.'},fr:{title:'🆘 Numéros utiles & urgences',lead:'En cas de danger immédiat, appelez les services d’urgence.',n112:'Numéro d’urgence européen',n118:'Urgence médicale',n115:'Pompiers',police:'Police municipale de Favignana',n1530:'Secours en mer',note:'En cas d’urgence, appelez le 112. Pour les urgences en mer, appelez le 1530. La police municipale est joignable pendant ses horaires de service.'}};
+function renderEmergencyCopy(){const t=emergencyCopy[currentLang]||emergencyCopy.it;for(const [id,key] of [['emergencyTitle','title'],['emergencyLead','lead'],['emergency112','n112'],['emergency118','n118'],['emergency115','n115'],['emergencyPolice','police'],['emergency1530','n1530'],['emergencyNote','note']]){const e=document.getElementById(id);if(e)e.textContent=t[key];}}
+
+const sunTimeLabels={it:{rise:'ALBA',set:'TRAMONTO'},en:{rise:'SUNRISE',set:'SUNSET'},de:{rise:'SONNENAUFGANG',set:'SONNENUNTERGANG'},fr:{rise:'LEVER DU SOLEIL',set:'COUCHER DU SOLEIL'}};
+function renderSunTimes(weather){
+ const daily=weather?.daily;const rise=daily?.sunrise?.[0],set=daily?.sunset?.[0];const labels=sunTimeLabels[currentLang]||sunTimeLabels.it;
+ const locale=currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT';
+ const format=value=>{if(!value)return '—:—';const d=new Date(value);return Number.isNaN(d.getTime())?'—:—':d.toLocaleTimeString(locale,{hour:'2-digit',minute:'2-digit',hour12:false,timeZone:'Europe/Rome'});};
+ const riseLabel=document.getElementById('sunriseLabel'),setLabel=document.getElementById('sunsetLabel');
+ if(riseLabel)riseLabel.textContent=labels.rise;if(setLabel)setLabel.textContent=labels.set;
+ const riseTime=document.getElementById('sunriseTime'),setTime=document.getElementById('sunsetTime');
+ if(riseTime)riseTime.textContent=format(rise);if(setTime)setTime.textContent=format(set);
+}
+async function fetchJsonWithTimeout(url, timeoutMs=20000){
+ const controller=new AbortController();
+ const timer=setTimeout(()=>controller.abort(),timeoutMs);
+ try{
+  const response=await fetch(url,{signal:controller.signal,cache:'no-store'});
+  if(!response.ok){
+   let detail='';try{const body=await response.json();detail=body.reason||body.message||'';}catch(_){}
+   throw new Error('HTTP '+response.status+(detail?': '+detail:''));
+  }
+  const data=await response.json();
+  if(data&&data.error)throw new Error(data.reason||'Risposta API non valida');
+  return data;
+ }finally{clearTimeout(timer);}
+}
+async function fetchJsonWithRetry(url,timeoutMs=20000){
+ let lastError;
+ for(let attempt=0;attempt<2;attempt++){
+  try{return await fetchJsonWithTimeout(url,timeoutMs);}
+  catch(error){
+   lastError=error;
+   const retryable=error.name==='AbortError'||error instanceof TypeError||/^HTTP 5/.test(error.message||'');
+   if(attempt===1||!retryable)break;
+   await new Promise(resolve=>setTimeout(resolve,650));
+  }
+ }
+ throw lastError;
+}
+function setMarineResult(result){
+ if(result&&result.status==='fulfilled'&&result.value&&result.value.current){
+  const m=result.value;liveMarineSnapshot=m;renderMarineForecast(m);
+  document.getElementById('waveHeight').textContent=m.current?.wave_height!=null?Number(m.current.wave_height).toFixed(1)+' m':'N/D';
+  document.getElementById('waveHeightDetail').textContent=m.current?.wave_height!=null?Number(m.current.wave_height).toFixed(1)+' m':'N/D';
+  document.getElementById('wavePeriod').textContent=m.current?.wave_period!=null?Number(m.current.wave_period).toFixed(0)+' s':'N/D';
+  document.getElementById('waveDirection').textContent=m.current?.wave_direction!=null?Math.round(m.current.wave_direction)+'° · '+degreesToDirection(m.current.wave_direction):'N/D';
+ }else{
+  const reason=result?.status==='rejected'?result.reason:new Error('Risposta marina incompleta');
+  console.warn('Smart Cala: dati marini non disponibili',reason);
+  liveMarineSnapshot=null;renderMarineForecast(null);
+  document.getElementById('waveHeight').textContent='N/D';document.getElementById('waveHeightDetail').textContent='N/D';document.getElementById('wavePeriod').textContent='N/D';document.getElementById('waveDirection').textContent='N/D';
+ }
+}
+function sunPayloadFromResult(result,weather){
+ if(result&&result.status==='fulfilled'&&result.value){
+  const uv=result.value;
+  return {current:{time:weather?.current?.time||new Date().toISOString()},daily:uv.daily||{},hourly:uv.hourly||{}};
+ }
+ return weather||null;
+}
+async function loadLiveWeather(){
+ const badge=document.getElementById('liveBadge'), status=document.getElementById('weatherStatus');
+ const t=uiText[currentLang]||uiText.it;
+ // Keep the proven V3.2.37 weather request unchanged. UV and marine data are isolated.
+ const base='https://api.open-meteo.com/v1/forecast?latitude=37.931&longitude=12.327&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&hourly=wind_speed_10m,wind_direction_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,sunrise,sunset&forecast_days=4&forecast_hours=12&wind_speed_unit=kmh&timezone=Europe%2FRome';
+ const marine='https://marine-api.open-meteo.com/v1/marine?latitude=37.931&longitude=12.327&current=wave_height,wave_direction,wave_period,sea_surface_temperature&hourly=wave_height,wave_direction,wave_period,sea_surface_temperature&forecast_days=1&timezone=Europe%2FRome&cell_selection=sea';
+ const uv='https://api.open-meteo.com/v1/forecast?latitude=37.931&longitude=12.327&hourly=uv_index,uv_index_clear_sky&daily=uv_index_max,uv_index_clear_sky_max&forecast_days=4&forecast_hours=24&timezone=Europe%2FRome';
+ status.textContent=t.connecting;badge.textContent=t.loading;badge.className='pill demo';
+ const results=await Promise.allSettled([
+  fetchJsonWithRetry(base,20000),
+  fetchJsonWithRetry(marine,20000),
+  fetchJsonWithRetry(uv,20000)
+ ]);
+ const weatherResult=results[0],marineResult=results[1],uvResult=results[2];
+ renderEmergencyCopy();
+ if(weatherResult.status!=='fulfilled'||!weatherResult.value?.current){
+  const reason=weatherResult.status==='rejected'?weatherResult.reason:new Error('Risposta meteo incompleta');
+  console.error('Smart Cala: richiesta meteo principale fallita',reason);
+  liveWeatherSnapshot=null;dailyForecastSnapshot=null;
+  status.textContent=t.weatherUnavailable;badge.textContent=t.weatherUnavailableBadge;badge.className='pill demo';
+  document.getElementById('temperature').textContent='—°';
+  document.getElementById('weatherDescription').textContent=t.weatherRetry;
+  document.getElementById('updatedAt').textContent=t.sourceOpen;
+  document.getElementById('windStat').textContent='N/D';document.getElementById('windSpeed').textContent='N/D';document.getElementById('windGusts').textContent='N/D';
+  document.getElementById('windHourly').innerHTML='<div class="forecast-empty">'+t.forecastUnavailable+'</div>';
+  document.getElementById('windPoint').textContent='N/D';document.getElementById('windExactSpeed').textContent='N/D';document.getElementById('windExactGust').textContent='N/D';document.getElementById('windDegrees').textContent='N/D';document.getElementById('beaufortLabel').textContent='N/D';document.getElementById('windForce').textContent=t.notAvailable;
+  renderDailyForecast();renderSunTimes(null);
+  renderSunProtection(sunPayloadFromResult(uvResult,null));
+  setMarineResult(marineResult);
+  render();return;
+ }
+ const weather=weatherResult.value,c=weather.current;
+ liveWeatherSnapshot=weather;dailyForecastSnapshot=weather;
+ renderDailyForecast();renderSunTimes(weather);
+ renderSunProtection(sunPayloadFromResult(uvResult,weather));
+ if(uvResult.status!=='fulfilled')console.warn('Smart Cala: UV non disponibile, meteo principale regolarmente caricato',uvResult.reason);
+ const dir=degreesToDirection(c.wind_direction_10m);
+ document.getElementById('temperature').textContent=Number.isFinite(Number(c.temperature_2m))?Math.round(c.temperature_2m)+'°':'N/D';
+ document.getElementById('weatherDescription').textContent=weatherText(c.weather_code);
+ setWeatherScene(c.weather_code,Number(c.is_day)===1);
+ document.getElementById('windStat').textContent=dir+' · '+localizedCompassName(dir);
+ document.getElementById('windSpeed').textContent=Number.isFinite(Number(c.wind_speed_10m))?Math.round(c.wind_speed_10m)+' km/h':'N/D';
+ document.getElementById('windGusts').textContent=Number.isFinite(Number(c.wind_gusts_10m))?Math.round(c.wind_gusts_10m)+' km/h':'N/D';
+ setWindDirection(c.wind_direction_10m,c.wind_speed_10m,c.wind_gusts_10m);renderHourly(weather);
+ const dt=new Date(c.time);document.getElementById('updatedAt').textContent=t.updated+': '+dt.toLocaleString(currentLang==='en'?'en-GB':currentLang==='de'?'de-DE':currentLang==='fr'?'fr-FR':'it-IT',{dateStyle:'short',timeStyle:'short'})+' · '+t.sourceOpen;
+ status.textContent=t.weatherLive;status.className='pill';badge.textContent=t.weatherUpdated;badge.className='pill';
+ setMarineResult(marineResult);
+ selected=dir;render();
+}
+
+const selector=document.getElementById("windSelector");
+const list=document.getElementById("beachList");
+const nameByDir=Object.fromEntries(data.map(x=>[x.dir,x.name]));
+const smartAdviceCopy={
+ it:{loading:'Analisi delle condizioni in corso',loadingText:'Smart Cala incrocia direzione e intensità del vento con i dati marini disponibili.',good:'Condizioni relativamente favorevoli',goodText:'La direzione del vento corrisponde alla matrice locale e i valori generali di vento e onde risultano contenuti. Le cale elencate sono candidate da valutare sul posto.',caution:'Valuta con attenzione',cautionText:'La matrice locale individua queste cale per la direzione del vento, ma vento, raffiche o moto ondoso richiedono prudenza e una verifica delle condizioni reali.',alert:'Condizioni marine impegnative',alertText:'I valori disponibili indicano vento sostenuto e/o mare mosso. Non considerare l’elenco come un invito a entrare in acqua: verifica gli avvisi ufficiali e valuta di rimandare.',noSea:'Dati marini non disponibili',noSeaText:'La selezione si basa sulla direzione del vento e sulla matrice locale. Senza dati sulle onde la valutazione resta incompleta.',wind:'Vento',gust:'Raffiche',waves:'Onde',period:'Periodo',matrix:'Matrice locale',notSafety:'Indicazione orientativa · non è un giudizio di sicurezza'},
+ en:{loading:'Analysing current conditions',loadingText:'Smart Cala combines wind direction and strength with the available marine data.',good:'Relatively favourable conditions',goodText:'Wind direction matches the local matrix and overall wind and wave values are limited. Listed coves are candidates to assess on site.',caution:'Use extra caution',cautionText:'The local matrix identifies these coves for the current wind direction, but wind, gusts or waves call for caution and an on-site check.',alert:'Challenging sea conditions',alertText:'Available values indicate strong wind and/or rougher seas. Do not treat this list as a recommendation to enter the water; check official alerts and consider postponing.',noSea:'Marine data unavailable',noSeaText:'This selection uses wind direction and the local matrix. Without wave data, the assessment is incomplete.',wind:'Wind',gust:'Gusts',waves:'Waves',period:'Period',matrix:'Local matrix',notSafety:'Indicative guidance · not a safety assessment'},
+ de:{loading:'Aktuelle Bedingungen werden geprüft',loadingText:'Smart Cala kombiniert Windrichtung und -stärke mit den verfügbaren Meeresdaten.',good:'Relativ günstige Bedingungen',goodText:'Die Windrichtung passt zur lokalen Matrix; Wind- und Wellenwerte sind insgesamt begrenzt. Die aufgeführten Buchten sollten vor Ort geprüft werden.',caution:'Bitte besonders vorsichtig sein',cautionText:'Die lokale Matrix nennt diese Buchten für die aktuelle Windrichtung. Wind, Böen oder Wellen erfordern jedoch Vorsicht und eine Prüfung vor Ort.',alert:'Anspruchsvolle Meeresbedingungen',alertText:'Die verfügbaren Werte weisen auf starken Wind und/oder bewegte See hin. Diese Liste ist keine Badeempfehlung. Bitte offizielle Warnungen prüfen und einen Besuch gegebenenfalls verschieben.',noSea:'Keine Meeresdaten verfügbar',noSeaText:'Die Auswahl basiert auf Windrichtung und lokaler Matrix. Ohne Wellendaten ist die Einschätzung unvollständig.',wind:'Wind',gust:'Böen',waves:'Wellen',period:'Periode',matrix:'Lokale Matrix',notSafety:'Orientierungshilfe · keine Sicherheitsbewertung'},
+ fr:{loading:'Analyse des conditions en cours',loadingText:'Smart Cala croise la direction et la force du vent avec les données marines disponibles.',good:'Conditions relativement favorables',goodText:'La direction du vent correspond à la matrice locale et les valeurs générales du vent et des vagues restent limitées. Les criques listées sont à vérifier sur place.',caution:'Restez prudent',cautionText:'La matrice locale indique ces criques pour la direction actuelle du vent, mais le vent, les rafales ou les vagues imposent de la prudence et une vérification sur place.',alert:'Conditions marines difficiles',alertText:'Les valeurs disponibles indiquent un vent soutenu et/ou une mer agitée. Cette liste ne constitue pas une invitation à se baigner : consultez les alertes officielles et envisagez de reporter.',noSea:'Données marines indisponibles',noSeaText:'La sélection repose sur la direction du vent et la matrice locale. Sans données sur les vagues, l’évaluation reste incomplète.',wind:'Vent',gust:'Rafales',waves:'Vagues',period:'Période',matrix:'Matrice locale',notSafety:'Indication indicative · pas une évaluation de sécurité'}
+};
+function updateSmartAdvice(item){
+ const t=smartAdviceCopy[currentLang]||smartAdviceCopy.it;
+ const box=document.getElementById('smartAdvice');if(!box)return;
+ const wc=liveWeatherSnapshot?.current||{};const mc=liveMarineSnapshot?.current||{};
+ const wind=Number(wc.wind_speed_10m),gust=Number(wc.wind_gusts_10m),wave=Number(mc.wave_height),period=Number(mc.wave_period);
+ const hasWind=Number.isFinite(wind),hasWave=Number.isFinite(wave);
+ let level='good',title=t.good,body=t.goodText,icon='🌤️';
+ if(!hasWind){level='caution';title=t.loading;body=t.loadingText;icon='🧭';}
+ else if(wind>=30 || gust>=42 || (hasWave&&wave>=1.2)){level='alert';title=t.alert;body=t.alertText;icon='⚠️';}
+ else if(wind>=20 || gust>=30 || (hasWave&&wave>=0.7) || !hasWave){level='caution';title=hasWave?t.caution:t.noSea;body=hasWave?t.cautionText:t.noSeaText;icon='🟠';}
+ box.className='smart-advice '+(level==='good'?'':level);
+ document.getElementById('smartAdviceIcon').textContent=icon;
+ document.getElementById('smartAdviceTitle').textContent=title;
+ document.getElementById('smartAdviceText').textContent=body;
+ const chips=[];
+ if(hasWind)chips.push(t.wind+' '+wind.toFixed(0)+' km/h');
+ if(Number.isFinite(gust))chips.push(t.gust+' '+gust.toFixed(0)+' km/h');
+ if(hasWave)chips.push(t.waves+' '+wave.toFixed(1)+' m');
+ if(Number.isFinite(period))chips.push(t.period+' '+period.toFixed(0)+' s');
+ chips.push(t.matrix+' '+item.dir);
+ chips.push(t.notSafety);
+ document.getElementById('smartAdviceMeta').innerHTML=chips.map(x=>'<span class="advice-chip"></span>').join('');
+ [...document.getElementById('smartAdviceMeta').children].forEach((el,i)=>el.textContent=chips[i]);
+}
+
+function render(){
+ const item=data.find(x=>x.dir===selected);
+ updateSmartAdvice(item);
+ document.getElementById("resultTitle").textContent=translations[currentLang].windFrom+" "+item.dir+" — "+localizedCompassName(item.dir);
+ document.getElementById("resultSub").textContent=item.beaches.length+" "+translations[currentLang].listSuffix;
+ [...selector.querySelectorAll("button")].forEach(b=>b.classList.toggle("active",b.dataset.dir===selected));
+ list.innerHTML="";
+ item.beaches.forEach((beach,i)=>{const el=document.createElement("article");el.className="beach";el.innerHTML='<div class="num">'+translations[currentLang].cala+' '+String(i+1).padStart(2,"0")+'</div><h3></h3><p>'+((uiText[currentLang]||uiText.it).included)+item.dir+'.</p><div class="beach-actions"><button type="button" class="maplink" style="border:0;background:#e4f4f3;color:#087e8b;border-radius:10px;padding:8px 10px;font-weight:800;cursor:pointer">'+translations[currentLang].mapButton+'</button><a class="go-cove" target="_blank" rel="noopener noreferrer">'+translations[currentLang].directionsNow+'</a></div>';el.querySelector("h3").textContent=beach;el.querySelector(".maplink").addEventListener("click",()=>focusCove(beach));const point=mapPoints.find(p=>p.name===beach);const go=el.querySelector('.go-cove');if(point){go.href=googleMapsDirectionsUrl(point);go.setAttribute('aria-label',translations[currentLang].directionsNow.replace(' ↗','')+' — '+beach);}else{go.removeAttribute('href');go.textContent=translations[currentLang].mapButton;go.setAttribute('aria-disabled','true');go.title='Posizione non disponibile per questa cala';}list.appendChild(el)});
+}
+data.forEach(item=>{const b=document.createElement("button");b.type="button";b.textContent=item.dir;b.dataset.dir=item.dir;b.addEventListener("click",()=>{selected=item.dir;render()});selector.appendChild(b)});
+document.getElementById("matrixBody").innerHTML=data.map(x=>'<tr><td>'+x.dir+'</td><td>'+localizedCompassName(x.dir)+'</td><td>'+x.beaches.join(", ")+'</td></tr>').join("");
+render();
+function loadLeafletAndInitMap(){
+ const initAllLeafletMaps=()=>{initMap();initFerryLiveMap();};
+ if(window.L){initAllLeafletMaps();return;}
+ const urls=['https://unpkg.com/leaflet@1.9.4/dist/leaflet.js','https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js','https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js'];
+ let i=0;
+ const tryNext=()=>{
+  if(window.L){initAllLeafletMaps();return;}
+  if(i>=urls.length){document.getElementById('map').innerHTML='<div style="padding:24px;color:#17343b;font-weight:700;line-height:1.5">'+(uiText[currentLang]||uiText.it).mapFailure+'</div>';const ferry=document.getElementById('ferryLiveMap');if(ferry)ferry.innerHTML='<div style="padding:24px;color:#17343b;font-weight:700">Mappa non disponibile: impossibile caricare il servizio cartografico. Controlla la connessione e ricarica la pagina.</div>';return;}
+  const script=document.createElement('script');script.src=urls[i++];script.onload=()=>{if(window.L)initAllLeafletMaps();else tryNext();};script.onerror=tryNext;document.head.appendChild(script);
+ };
+ tryNext();
+}
+setLanguage(currentLang);
+renderEmergencyCopy();renderSunProtection(null);
+loadLeafletAndInitMap();
+loadLiveWeather();
+
+// Live Tracking Egadi · cartografia Smart Cala
+// La mappa mostra l'area e i porti; le posizioni dei mezzi verranno aggiunte
+// esclusivamente tramite un feed AIS/API autorizzato. Nessun dato nave simulato.
+function initFerryLiveMap(){
+ const el=document.getElementById('ferryLiveMap');
+ if(!el || el.dataset.ready==='1' || !window.L) return;
+ el.dataset.ready='1';
+ const map=L.map('ferryLiveMap',{scrollWheelZoom:false,zoomControl:true}).setView([37.965,12.285],10);
+ // Stessa cartografia della sezione Matrice vento: satellite Esri, etichette Esri e mappa stradale selezionabile.
+ const satellite=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{attribution:'Tiles © Esri — Sources: Esri, Maxar, Earthstar Geographics',maxZoom:19,crossOrigin:true});
+ map.createPane('ferryLabelsPane');
+ map.getPane('ferryLabelsPane').style.zIndex='550';
+ map.getPane('ferryLabelsPane').style.pointerEvents='none';
+ const labels=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{attribution:'Labels © Esri',maxZoom:19,opacity:0.95,pane:'ferryLabelsPane'});
+ const street=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19});
+ satellite.addTo(map); labels.addTo(map);
+ const layerNames=currentLang==='en'?{sat:'Satellite',street:'Street map',labels:'Names and borders'}:currentLang==='de'?{sat:'Satellit',street:'Straßenkarte',labels:'Namen und Grenzen'}:currentLang==='fr'?{sat:'Satellite',street:'Carte routière',labels:'Noms et limites'}:{sat:'Satellite',street:'Mappa stradale',labels:'Nomi e confini'};
+ L.control.layers({[layerNames.sat]:satellite,[layerNames.street]:street},{[layerNames.labels]:labels},{collapsed:window.matchMedia('(max-width: 800px)').matches,position:'topright'}).addTo(map);
+ const ports=[
+  {name:'Trapani',coords:[38.0176,12.5100]},
+  {name:'Marsala',coords:[37.79155,12.43406]},
+  {name:'Favignana',coords:[37.9310,12.3270]},
+  {name:'Levanzo',coords:[38.0000,12.3370]},
+  {name:'Marettimo',coords:[37.9680,12.0630]}
+ ];
+ ports.forEach(p=>L.circleMarker(p.coords,{radius:6,color:'#087e8b',weight:2,fillColor:'#ffffff',fillOpacity:1}).addTo(map).bindTooltip(p.name));
+ const routes=[[[38.0176,12.5100],[37.9310,12.3270]],[[37.79155,12.43406],[37.9310,12.3270]],[[38.0176,12.5100],[38.0000,12.3370]],[[38.0176,12.5100],[37.9680,12.0630]],[[37.9310,12.3270],[38.0000,12.3370]],[[37.9310,12.3270],[37.9680,12.0630]],[[38.0000,12.3370],[37.9680,12.0630]]];
+ routes.forEach(r=>L.polyline(r,{color:'#168b9b',weight:2,opacity:.45,dashArray:'5 7'}).addTo(map));
+ setTimeout(()=>map.invalidateSize(true),250);window.addEventListener('resize',()=>map.invalidateSize(true));map.on('baselayerchange',()=>setTimeout(()=>map.invalidateSize(true),100));
+}
+
+
+</script>
+</body>
+</html>
